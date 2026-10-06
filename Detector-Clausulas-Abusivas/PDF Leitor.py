@@ -18,17 +18,13 @@ def extrair_pdf():
     caminho = entrada_pdf.get()
 
     if not caminho:
-        messagebox.showwarning(
-            "Atenção",
-            "Selecione um PDF primeiro."
-        )
+        messagebox.showwarning("Atenção", "Selecione um PDF primeiro.")
         return
 
     try:
         documento = fitz.open(caminho)
 
         texto = ""
-
         for pagina in documento:
             texto += pagina.get_text()
 
@@ -37,12 +33,10 @@ def extrair_pdf():
         caixa_texto.delete("1.0", tk.END)
         caixa_texto.insert("1.0", texto)
 
-    except Exception as erro:
-        messagebox.showerror(
-            "Erro",
-            f"Não foi possível ler o PDF:\n{erro}"
-        )
+        #Uso_Texto() 
 
+    except Exception as erro:
+        messagebox.showerror("Erro", f"Não foi possível ler o PDF:\n{erro}")
 
 def salvar_txt():
     texto = caixa_texto.get("1.0", tk.END).strip()
@@ -69,6 +63,10 @@ def salvar_txt():
             "Texto salvo com sucesso!"
         )
 
+def Uso_Texto():
+    texto = caixa_texto.get("1.0", tk.END).strip()
+    print(texto)
+
 
 # -------------------------
 # Interface
@@ -81,7 +79,7 @@ janela.geometry("800x800")
 tk.Label(
     janela,
     text="Extrator de Texto PDF",
-    font=("Arial", 18, "800")
+    font=("Arial", 18, "bold")
 ).pack(pady=15)
 
 
@@ -126,5 +124,5 @@ tk.Button(
     width=20
 ).pack(pady=15)
 
-
 janela.mainloop()
+#Ultima Mod = 06/10/2026 16:30
