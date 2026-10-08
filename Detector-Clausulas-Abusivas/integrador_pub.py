@@ -1,0 +1,1 @@
+from pdf_leitor import uso_texto
