@@ -4,7 +4,9 @@ import fitz
 
 print("pdf_leitor, __name__ =", __name__)
 
-def selecionar_pdf():
+dados = {"texto": ""}    # NOVO: guarda o texto lido, fica disponível para quem importar o arquivo
+
+def selecionar_pdf(entrada_pdf):    # ALTERADO: recebe a caixa de entrada como parâmetro (antes era global)
     caminho = filedialog.askopenfilename(
         title="Selecionar PDF",
         filetypes=[("Arquivos PDF", "*.pdf")]
@@ -15,7 +17,7 @@ def selecionar_pdf():
         entrada_pdf.insert(0, caminho)
 
 
-def extrair_pdf():
+def extrair_pdf(entrada_pdf, caixa_texto):    # ALTERADO: recebe as duas caixas como parâmetros (antes eram globais)
     caminho = entrada_pdf.get()
 
     if caminho == "":
@@ -31,6 +33,8 @@ def extrair_pdf():
 
         documento.close()
 
+        dados["texto"] = texto.strip()    # NOVO: guarda o texto lido para ser usado depois por outros arquivos
+
         caixa_texto.delete("1.0", tk.END)
         caixa_texto.insert("1.0", texto)
 
@@ -41,7 +45,7 @@ def extrair_pdf():
 
 
 def salvar_txt():
-    texto = caixa_texto.get("1.0", tk.END).strip()
+    texto = dados["texto"]    # ALTERADO: pega o texto guardado em "dados" (antes pegava da caixa_texto)
 
     if texto == "":
         messagebox.showwarning("Atenção", "Não há texto para salvar.")
@@ -61,13 +65,13 @@ def salvar_txt():
 
 
 def uso_texto():
-    texto = caixa_texto.get("1.0", tk.END).strip()   # pega o texto que está na caixa
+    texto = dados["texto"]    # ALTERADO: pega o texto guardado em "dados" (antes pegava da caixa_texto, que some quando a janela fecha)
     print(texto)                                     # por enquanto só mostra no terminal
     return texto                                     # devolve o texto para quem chamou
 
 
 def iniciar():
-    global entrada_pdf, caixa_texto
+    # ALTERADO: linha "global entrada_pdf, caixa_texto" removida, não precisa mais
 
     janela = tk.Tk()
     janela.title("Extrator de Texto PDF")
@@ -85,11 +89,12 @@ def iniciar():
     entrada_pdf = tk.Entry(frame, width=60)
     entrada_pdf.pack(side=tk.LEFT, padx=5)
 
-    tk.Button(frame, text="Selecionar PDF", command=selecionar_pdf).pack(side=tk.LEFT)
+    tk.Button(frame, text="Selecionar PDF", command=lambda: selecionar_pdf(entrada_pdf)).pack(side=tk.LEFT)    # ALTERADO: lambda para passar a entrada_pdf à função
 
-    tk.Button(janela, text="Extrair texto", command=extrair_pdf, width=20).pack(pady=15)
+    caixa_texto = tk.Text(janela, wrap=tk.WORD)    # ALTERADO: movida para cima, para existir antes do botão "Extrair texto" usar ela
 
-    caixa_texto = tk.Text(janela, wrap=tk.WORD)
+    tk.Button(janela, text="Extrair texto", command=lambda: extrair_pdf(entrada_pdf, caixa_texto), width=20).pack(pady=15)    # ALTERADO: lambda para passar as duas caixas à função
+
     caixa_texto.pack(expand=True, fill=tk.BOTH, padx=20, pady=10)
 
     tk.Button(janela, text="Salvar TXT", command=salvar_txt, width=20).pack(pady=15)
