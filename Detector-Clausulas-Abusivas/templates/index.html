@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Detector de Cláusulas Abusivas</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main>
+    <h1>Detector de Cláusulas Abusivas</h1>
+
+    <form id="formulario">
+      <label for="pdf">Contrato em PDF</label>
+      <div class="linha">
+        <input type="file" id="pdf" name="pdf" accept="application/pdf">
+        <button type="submit" id="botao-ler">Ler PDF</button>
+      </div>
+    </form>
+
+    <p id="status" role="status" aria-live="polite"></p>
+
+    <section id="resultado" hidden>
+      <h2>Pontos para conferir</h2>
+      <ul id="achados"></ul>
+
+      <label for="texto">Texto extraído</label>
+      <textarea id="texto" readonly></textarea>
+
+      <button type="button" id="botao-baixar" class="secundario">Baixar TXT</button>
+
+      <p class="nota">Apontamentos informativos. Não substituem a opinião de um advogado.</p>
+    </section>
+  </main>
+
+  <script>
+    const formulario = document.getElementById("formulario");
+    const campoPdf = document.getElementById("pdf");
+    const botaoLer = document.getElementById("botao-ler");
+    const status = document.getElementById("status");
+    const resultado = document.getElementById("resultado");
+    const campoTexto = document.getElementById("texto");
+    const listaAchados = document.getElementById("achados");
+    const botaoBaixar = document.getElementById("botao-baixar");
+
+    let nomeBase = "contrato";
+
+    function mostrarAchados(achados) {
+      listaAchados.innerHTML = "";
+
+      if (achados.length === 0) {
+        const vazio = document.createElement("li");
+        vazio.textContent = "Nenhum ponto automático encontrado neste texto.";
+        listaAchados.appendChild(vazio);
+        return;
+      }
+
+      achados.forEach(function (achado) {
+        const item = document.createElement("li");
+
+        const titulo = document.createElement("strong");
+        titulo.textContent = achado.titulo;
+        if (achado.quantidade > 0) {
+          titulo.textContent += " (" + achado.quantidade + (achado.quantidade === 1 ? " vez)" : " vezes)");
+        }
+
+        const aviso = document.createElement("p");
+        aviso.textContent = achado.aviso;
+
+        const norma = document.createElement("small");
+        norma.textContent = achado.norma;
+
+        item.append(titulo, aviso, norma);
+        listaAchados.appendChild(item);
+      });
+    }
+
+    formulario.addEventListener("submit", async function (evento) {
+      evento.preventDefault();
+
+      if (campoPdf.files.length === 0) {
+        status.textContent = "Selecione um PDF primeiro.";
+        status.className = "erro";
+        return;
+      }
+
+      const arquivo = campoPdf.files[0];
+      nomeBase = arquivo.name.replace(/\.pdf$/i, "");
+
+      const dados = new FormData();
+      dados.append("pdf", arquivo);
+
+      botaoLer.disabled = true;
+      resultado.hidden = true;
+      status.textContent = "Lendo o PDF...";
+      status.className = "";
+
+      try {
+        const resposta = await fetch("/ler-pdf", { method: "POST", body: dados });
+        const json = await resposta.json();
+
+        if (!resposta.ok) {
+          status.textContent = json.erro;
+          status.className = "erro";
+          return;
+        }
+
+        campoTexto.value = json.texto;
+        mostrarAchados(json.achados);
+        status.textContent = json.caracteres.toLocaleString("pt-BR") + " caracteres lidos.";
+        resultado.hidden = false;
+      } catch (erro) {
+        status.textContent = "Não foi possível falar com o servidor. Ele está rodando?";
+        status.className = "erro";
+      } finally {
+        botaoLer.disabled = false;
+      }
+    });
+
+    botaoBaixar.addEventListener("click", function () {
+      const arquivo = new Blob([campoTexto.value], { type: "text/plain;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(arquivo);
+      link.download = nomeBase + ".txt";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+  </script>
+</body>
+</html>
