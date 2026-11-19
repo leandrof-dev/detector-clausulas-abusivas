@@ -16,3 +16,6 @@ Thumbs.db
 .idea/
 
 .ipynb_checkpoints/
+
+.env.*
+!.env.example
