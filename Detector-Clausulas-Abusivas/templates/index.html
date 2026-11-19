@@ -1,130 +1,783 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Detector de Cláusulas Abusivas</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-  <main>
-    <h1>Detector de Cláusulas Abusivas</h1>
-
-    <form id="formulario">
-      <label for="pdf">Contrato em PDF</label>
-      <div class="linha">
-        <input type="file" id="pdf" name="pdf" accept="application/pdf">
-        <button type="submit" id="botao-ler">Ler PDF</button>
-      </div>
-    </form>
-
-    <p id="status" role="status" aria-live="polite"></p>
-
-    <section id="resultado" hidden>
-      <h2>Pontos para conferir</h2>
-      <ul id="achados"></ul>
-
-      <label for="texto">Texto extraído</label>
-      <textarea id="texto" readonly></textarea>
-
-      <button type="button" id="botao-baixar" class="secundario">Baixar TXT</button>
-
-      <p class="nota">Apontamentos informativos. Não substituem a opinião de um advogado.</p>
-    </section>
-  </main>
-
-  <script>
-    const formulario = document.getElementById("formulario");
-    const campoPdf = document.getElementById("pdf");
-    const botaoLer = document.getElementById("botao-ler");
-    const status = document.getElementById("status");
-    const resultado = document.getElementById("resultado");
-    const campoTexto = document.getElementById("texto");
-    const listaAchados = document.getElementById("achados");
-    const botaoBaixar = document.getElementById("botao-baixar");
-
-    let nomeBase = "contrato";
-
-    function mostrarAchados(achados) {
-      listaAchados.innerHTML = "";
-
-      if (achados.length === 0) {
-        const vazio = document.createElement("li");
-        vazio.textContent = "Nenhum ponto automático encontrado neste texto.";
-        listaAchados.appendChild(vazio);
-        return;
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>Você sabe o que está pagando?</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..800&amp;display=swap" />
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <!-- importmap: diz ao navegador onde está o Three.js (biblioteca de 3D) quando um script pede "three" -->
+    <script type="importmap">
+      {
+        "imports": { "three": "/static/vendor/three/three.module.js", "three/addons/": "/static/vendor/three/addons/" }
       }
+    </script>
+  </head>
+  <body>
+    <!-- barra de progresso da rolagem (topo da janela) -->
+    <div id="prog"></div>
+    <!-- HERO: #track é alto (430vh) para dar rolagem à animação; #hero fica preso na tela enquanto isso (hero.js) -->
+    <div id="track">
+      <section id="hero">
+        <canvas id="cv" aria-hidden="true"></canvas>
+        <nav>
+          <a href="/" class="on">Início</a>
+          <a href="/enviar_pdf">Envie seu PDF</a>
+          <a href="/faq">FAQ</a>
+          <a href="/sobre">Sobre nós</a>
+          <a href="/contato">Contato</a>
+        </nav>
+        <div class="copy">
+          <div class="stg" id="stg">
+            <i></i>
+            <span id="stgt">Atenção · contrato caro</span>
+          </div>
+          <h1 class="hl" id="hl"></h1>
+          <div class="slg" id="slg"></div>
+          <div class="line"></div>
+        </div>
+        <aside id="panel">
+          <div class="hd">
+            <span class="ic">
+              <svg id="ic1" viewBox="0 0 24 24">
+                <path d="M12 3.2L22 20.2H2z" style="fill: currentColor; fill-opacity: 0.14" />
+                <path d="M12 9.2v5.2M12 17.4v.2" />
+              </svg>
+              <svg id="ic2" viewBox="0 0 24 24" style="opacity: 0">
+                <path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z" />
+                <path d="M8.5 12l2.5 2.5 4.5-5" />
+              </svg>
+            </span>
+            Análise do seu contrato
+          </div>
+          <div class="cap" id="cap"></div>
+          <div id="rows"></div>
+          <div class="bar"><i id="bar"></i></div>
+        </aside>
+        <svg
+          id="hint"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M5 9l7 7 7-7" />
+        </svg>
+      </section>
+    </div>
+    <!-- PÁGINA: cada .bn é uma seção; --k é a cor de destaque dela -->
+    <main id="pg">
+      <!-- 1 · O problema: iceberg (iceberg.js + faixas em secoes.js) -->
+      <section class="bn" style="--k: #ff5566">
+        <div class="gr">
+          <div>
+            <span class="eb rv">O problema</span>
+            <h2 class="rv">A parcela é só a <span class="b">ponta do contrato.</span></h2>
+            <p class="sb rv">
+              Documentos longos e técnicos, assinados em poucos minutos: a escolha acaba apoiada num número só.
+            </p>
+            <div class="ln rv"></div>
+          </div>
+          <div class="rv">
+            <div class="gp fy">
+              <div class="ph">
+                <span class="ic" style="color: var(--k)">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 3.2L22 20.2H2z" style="fill: currentColor; fill-opacity: 0.14" />
+                    <path d="M12 9.2v5.2M12 17.4v.2" />
+                  </svg>
+                </span>
+                O que está sob a parcela
+              </div>
+              <div class="ice" id="ice">
+                <canvas id="icv"></canvas>
+                <div class="bd" style="top: 0; height: 30.8%; --r: 143, 208, 255">
+                  <span><b>Parcela e preço</b> <small>o que a gente vê como principal</small></span>
+                </div>
+                <div class="bd w" style="top: 30.8%; height: 21%; --r: 255, 154, 164">
+                  <span><b>Encargos</b> <small>oculto</small></span>
+                </div>
+                <div class="bd" style="top: 51.8%; height: 21%; --r: 255, 85, 102">
+                  <span><b>Tarifas embutidas</b> <small>oculto</small></span>
+                </div>
+                <div class="bd" style="top: 72.8%; height: 27.2%; --r: 185, 64, 106">
+                  <span><b>Serviços agregados e outros</b> <small>oculto</small></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      achados.forEach(function (achado) {
-        const item = document.createElement("li");
+      <!-- 2 · Caso real: leitura guiada de um contrato (secoes.js) -->
+      <section class="bn" style="--k: #ff6b7d">
+        <div class="gr">
+          <div>
+            <span class="eb rv">Leitura guiada · caso real</span>
+            <h2 class="rv">Um contrato de verdade, <span class="b">lido ponto a ponto.</span></h2>
+            <p class="sb rv">
+              Trechos de um contrato público de financiamento de veículo que passou por perícia judicial. Passe o mouse
+              ou toque em cada ponto.
+            </p>
+            <div class="ln rv"></div>
+            <p class="nt rv">
+              Baseado em laudo pericial público de revisão contratual (Banco Volkswagen S/A, contrato de 2017). Dados
+              pessoais removidos. Não é análise jurídica.
+            </p>
+          </div>
+          <div class="rv">
+            <div class="gp" data-tilt="soft">
+              <div class="ph">
+                <span class="ic" style="color: var(--k)">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M7 3h7l5 5v13H7z" />
+                    <path d="M14 3v5h5M10 13h6M10 17h4" />
+                  </svg>
+                </span>
+                Cédula de Crédito Bancário · veículo usado
+              </div>
+              <div class="dsum">
+                <div><small>Valor do bem</small> <b>R$ 30.900</b></div>
+                <div><small>Entrada</small> <b>R$ 17.000</b></div>
+                <div><small>Total financiado</small> <b>R$ 14.927</b></div>
+                <div><small>Parcelas</small> <b>48 × R$ 491,60</b></div>
+              </div>
+              <div class="dcl" id="ppr">
+                <button class="cl" type="button">
+                  <i class="dt"></i>
+                  <span><em>Taxa de juros</em>2,05% ao mês · 27,57% ao ano</span>
+                  <s></s>
+                </button>
+                <button class="cl" type="button">
+                  <i class="dt"></i>
+                  <span><em>Tarifa de cadastro</em>R$ 495,00</span>
+                  <s></s>
+                </button>
+                <button class="cl" type="button">
+                  <i class="dt"></i>
+                  <span><em>IOF financiado</em>R$ 471,72 somado ao valor financiado</span>
+                  <s></s>
+                </button>
+                <button class="cl" type="button">
+                  <i class="dt"></i>
+                  <span><em>Parcelas fixas</em>sistema de amortização não nomeado</span>
+                  <s></s>
+                </button>
+                <button class="cl" type="button">
+                  <i class="dt"></i>
+                  <span><em>Encargos de atraso</em>comissão de permanência + multa + juros de mora</span>
+                  <s></s>
+                </button>
+              </div>
+              <div class="xpl" id="xpl" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        const titulo = document.createElement("strong");
-        titulo.textContent = achado.titulo;
-        if (achado.quantidade > 0) {
-          titulo.textContent += " (" + achado.quantidade + (achado.quantidade === 1 ? " vez)" : " vezes)");
-        }
+      <!-- 3 · O que vamos conferir: apontamentos com a norma (secoes.js) -->
+      <section class="bn" style="--k: #8d9bff">
+        <div class="gr">
+          <div>
+            <span class="eb rv">O que vamos conferir</span>
+            <h2 class="rv">Cada apontamento, <span class="b">amarrado na norma.</span></h2>
+            <p class="sb rv">
+              Juros, tarifas, seguro, multa, cancelamento e Custo Efetivo Total, cada um com a norma que o sustenta.
+            </p>
+            <div class="ln rv"></div>
+          </div>
+          <div class="rv">
+            <div class="gp fy ap" id="ap">
+              <div class="ph">
+                <span class="ic" style="color: var(--k)">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="6.5" />
+                    <path d="M20 20l-4.2-4.2" />
+                  </svg>
+                </span>
+                Pontos a conferir
+                <span class="apc" id="apc">analisando…</span>
+              </div>
+              <div class="apl">
+                <i class="bar3"></i>
+                <div class="rw">
+                  <i class="ai">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M19 5L5 19" />
+                      <circle cx="6.5" cy="6.5" r="2.5" />
+                      <circle cx="17.5" cy="17.5" r="2.5" />
+                    </svg>
+                  </i>
+                  <span>Juros<small>taxa clara, ao mês e ao ano</small></span>
+                  <i class="chip">CDC, art. 6º, III · CMN 3.517/2007</i>
+                  <div class="dd">
+                    <div>
+                      <p>
+                        A taxa precisa aparecer ao mês e ao ano. A gente compara com a média do Banco Central do mesmo
+                        período.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="rw">
+                  <i class="ai">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M6 3h12v18l-3-2-3 2-3-2-3 2z" />
+                      <path d="M9 8h6M9 12h6" />
+                    </svg>
+                  </i>
+                  <span>Tarifas<small>cada valor informado</small></span>
+                  <i class="chip">CDC, art. 6º, III</i>
+                  <div class="dd">
+                    <div>
+                      <p>
+                        Cada tarifa tem que estar escrita com o valor. Tarifa de cadastro, por exemplo, só no início do
+                        relacionamento.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="rw">
+                  <i class="ai">
+                    <svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z" /></svg>
+                  </i>
+                  <span>Seguro<small>opcional ou venda casada</small></span>
+                  <i class="chip">CDC, art. 39, I</i>
+                  <div class="dd">
+                    <div><p>Seguro pode ser oferecido, mas não imposto, e nunca com seguradora obrigatória.</p></div>
+                  </div>
+                </div>
+                <div class="rw">
+                  <i class="ai">
+                    <svg viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="8" />
+                      <path d="M12 8v4l3 2" />
+                    </svg>
+                  </i>
+                  <span>Multa<small>quando e quanto é cobrada</small></span>
+                  <i class="chip">CDC, art. 6º, III</i>
+                  <div class="dd">
+                    <div>
+                      <p>Atraso: multa de até 2% e juros de mora. Comissão de permanência não se soma a eles.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="rw">
+                  <i class="ai">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M10 4H5v16h5" />
+                      <path d="M14 8l4 4-4 4M18 12H9" />
+                    </svg>
+                  </i>
+                  <span>Cancelamento e renovação<small>saída, prazos e custos</small></span>
+                  <i class="chip">CDC, art. 51 · art. 6º, III</i>
+                  <div class="dd">
+                    <div><p>Quitar antes do prazo dá direito a desconto proporcional dos juros.</p></div>
+                  </div>
+                </div>
+                <div class="rw">
+                  <i class="ai">
+                    <svg viewBox="0 0 24 24"><path d="M17 5H7l6 7-6 7h10" /></svg>
+                  </i>
+                  <span>Custo Efetivo Total<small>deve ser informado</small></span>
+                  <i class="chip">CMN 3.517/2007</i>
+                  <div class="dd">
+                    <div>
+                      <p>
+                        O CET junta juros, tarifas, seguro e impostos numa taxa só. É o número para comparar propostas.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        const aviso = document.createElement("p");
-        aviso.textContent = achado.aviso;
+      <!-- 4 · Nota de confiabilidade: montanha 3D (montanha.js) + controle (secoes.js) -->
+      <section class="bn" id="nb" style="--c: #b496ff; --k: var(--c)">
+        <div class="gr">
+          <div>
+            <span class="eb rv">Nota de confiabilidade</span>
+            <h2 class="rv">Quanto o contrato <span class="b">foge da curva?</span></h2>
+            <p class="sb rv">
+              O sistema compara o contrato com referências da mesma categoria. Quanto mais fora da curva, menor a
+              confiabilidade da análise.
+            </p>
+            <div class="ln rv"></div>
+            <p class="nt rv">
+              É análise, não veredito jurídico. Role a página ou arraste o controle para afastar o contrato da curva:
+              simulação ilustrativa.
+            </p>
+          </div>
+          <div class="rv">
+            <div class="gp fy mtn" id="mt">
+              <div class="mv">
+                <canvas id="mcv" aria-hidden="true"></canvas>
+                <div class="pdf" aria-hidden="true">
+                  <div class="tg">
+                    <i>PDF</i>
+                    Exemplo ilustrativo
+                  </div>
+                  <h4>Contrato × referências</h4>
+                  <div class="lg">
+                    <s>Contrato</s>
+                    <s>Referência</s>
+                  </div>
+                  <div class="m">
+                    <b>Taxa ao mês</b>
+                    <small id="p1"></small>
+                    <div class="t c"><i id="b1"></i></div>
+                    <div class="t"><i style="width: 68%"></i></div>
+                  </div>
+                  <div class="m">
+                    <b>Custo efetivo total</b>
+                    <small id="p2"></small>
+                    <div class="t c"><i id="b2"></i></div>
+                    <div class="t"><i style="width: 64%"></i></div>
+                  </div>
+                  <div class="m">
+                    <b>Encargos adicionais</b>
+                    <small id="p3"></small>
+                    <div class="t c"><i id="b3"></i></div>
+                    <div class="t"><i style="width: 48%"></i></div>
+                  </div>
+                  <div class="cf">
+                    <span>Confiabilidade</span>
+                    <em id="pc"></em>
+                  </div>
+                  <div class="ft2">Simulação ilustrativa · não é análise jurídica</div>
+                </div>
+              </div>
+              <div class="sc">
+                <span id="st"></span>
+                <b id="sc"></b>
+              </div>
+              <div class="bar2"><i id="fl"></i></div>
+              <div
+                class="rt"
+                id="rt"
+                role="slider"
+                tabindex="0"
+                aria-label="Distância da curva de referência"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+              >
+                <i></i>
+              </div>
+              <div class="rl">
+                <span>Perto da curva</span>
+                <span>Longe da curva</span>
+              </div>
+              <span class="mh" id="mh">
+                <svg viewBox="0 0 14 22">
+                  <rect x="1" y="1" width="12" height="20" rx="6" />
+                  <circle cx="7" cy="6.5" r="1.6" fill="currentColor" stroke="none" />
+                </svg>
+                role ou arraste o controle</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
 
-        const norma = document.createElement("small");
-        norma.textContent = achado.norma;
+      <!-- 5 · Antes × depois: carro 3D (carro-comparacao.js) + divisória (secoes.js) -->
+      <section class="bn" style="--k: #7fd4ff">
+        <div class="gr">
+          <div>
+            <span class="eb rv">Antes × depois</span>
+            <h2 class="rv">O mesmo carro, <span class="b">dois contratos.</span></h2>
+            <p class="sb rv">
+              Arraste a divisória para comparar o contrato original com a versão ajustada às referências.
+            </p>
+            <div class="ln rv"></div>
+            <p class="nt rv">
+              Audi RS6 Avant 2026 pelo valor da tabela FIPE (outubro/2026): entrada de 40% e R$ 719.000 financiados em
+              48 parcelas. Taxas e encargos são ilustrativos.
+            </p>
+          </div>
+          <div class="rv">
+            <div class="gp" data-tilt="soft">
+              <div class="ph">Original × ajustado</div>
+              <div class="carw">
+                <div class="cpt">
+                  <span>Audi RS6 Avant 2026 · tabela FIPE out/2026</span>
+                  <b>R$ 1.198.549</b>
+                  <small>entrada de R$ 479.549 · R$ 719.000 financiados em 48 parcelas</small>
+                </div>
+                <div class="cvw">
+                  <canvas class="car3" aria-hidden="true"></canvas>
+                  <button
+                    type="button"
+                    class="fsb"
+                    aria-label="Abrir o modelo 3D em tela cheia"
+                    title="Abrir em tela cheia"
+                  >
+                    <svg viewBox="0 0 24 24">
+                      <rect x="4" y="8" width="12" height="12" rx="2" />
+                      <path d="M8 8V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="cmp" id="cmp">
+                <div class="ly a">
+                  <span class="lb">Original</span>
+                  <div class="rw">
+                    <span>Taxa</span>
+                    <b>2,8% a.m.</b>
+                  </div>
+                  <div class="rw">
+                    <span>Encargos</span>
+                    <b>R$ 59.700</b>
+                  </div>
+                  <div class="rw">
+                    <span>CET</span>
+                    <b>3,4% a.m.</b>
+                  </div>
+                  <div class="rw">
+                    <span>Parcela</span>
+                    <b data-f="p"></b>
+                  </div>
+                  <div class="rw">
+                    <span>Total pago</span>
+                    <b data-f="t"></b>
+                  </div>
+                </div>
+                <div class="ly b" aria-hidden="true">
+                  <span class="lb">Ajustado</span>
+                  <div class="rw">
+                    <span>Taxa</span>
+                    <b>2,4% a.m.</b>
+                  </div>
+                  <div class="rw">
+                    <span>Encargos</span>
+                    <b>R$ 36.400</b>
+                  </div>
+                  <div class="rw">
+                    <span>CET</span>
+                    <b>2,9% a.m.</b>
+                  </div>
+                  <div class="rw">
+                    <span>Parcela</span>
+                    <b data-f="p"></b>
+                  </div>
+                  <div class="rw">
+                    <span>Total pago</span>
+                    <b data-f="t"></b>
+                  </div>
+                </div>
+                <i class="dv"></i>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value="50"
+                  aria-label="Divisória entre contrato original e ajustado"
+                />
+              </div>
+              <div class="eco">Diferença no total pago<b id="cdf"></b></div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        item.append(titulo, aviso, norma);
-        listaAchados.appendChild(item);
-      });
-    }
+      <!-- 6 · Teste rápido: quiz (secoes.js) -->
+      <section class="bn" style="--k: #b496ff">
+        <div class="gr">
+          <div>
+            <span class="eb rv">Teste rápido</span>
+            <h2 class="rv">Você <span class="b">assinaria?</span></h2>
+            <p class="sb rv">Três cláusulas que aparecem em contratos de financiamento. Qual parece abusiva?</p>
+            <div class="ln rv"></div>
+            <p class="nt rv">As respostas valem como regra geral. Cada caso depende do contrato inteiro.</p>
+          </div>
+          <div class="rv">
+            <div class="gp" data-tilt="soft" id="quiz">
+              <div class="ph">Abusiva ou não?</div>
+              <div class="qz">
+                <div class="qi" data-a="abusiva">
+                  <p>“Multa de 10% sobre a parcela em atraso.”</p>
+                  <div class="qb">
+                    <button type="button" data-a="abusiva">Parece abusiva</button>
+                    <button type="button" data-a="ok">Parece ok</button>
+                  </div>
+                  <div class="qa">
+                    <div>
+                      <p>
+                        <em></em> Em contratos de crédito ao consumidor, a multa por atraso é limitada a 2% da prestação
+                        (CDC, art. 52, §1º).
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="qi" data-a="ok">
+                  <p>“IOF incluído no valor financiado, pago junto com as parcelas.”</p>
+                  <div class="qb">
+                    <button type="button" data-a="abusiva">Parece abusiva</button>
+                    <button type="button" data-a="ok">Parece ok</button>
+                  </div>
+                  <div class="qa">
+                    <div>
+                      <p>
+                        <em></em> O STJ admite financiar o IOF junto com o crédito (Tema 621). Ele só precisa estar
+                        informado no contrato.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="qi" data-a="abusiva">
+                  <p>“Comissão de permanência cobrada junto com juros de mora e multa.”</p>
+                  <div class="qb">
+                    <button type="button" data-a="abusiva">Parece abusiva</button>
+                    <button type="button" data-a="ok">Parece ok</button>
+                  </div>
+                  <div class="qa">
+                    <div>
+                      <p>
+                        <em></em> O STJ não permite somar a comissão de permanência a outros encargos de atraso (Súmula
+                        472).
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="qf">
+                <span class="qs" aria-live="polite"></span>
+                <button type="button" class="qr" hidden="">Refazer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-    formulario.addEventListener("submit", async function (evento) {
-      evento.preventDefault();
+      <!-- 7 · Privacidade -->
+      <section class="bn" style="--k: #3ff0a6">
+        <div class="gr">
+          <div>
+            <span class="eb rv">Privacidade</span>
+            <h2 class="rv">Sua identidade <span class="b">fica de fora.</span></h2>
+            <p class="sb rv">
+              Contratos públicos e os recebidos terão a identidade borrada. O sistema só vasculha informações úteis ao
+              cliente.
+            </p>
+            <div class="ln rv"></div>
+            <p class="nt rv">
+              Seus dados pessoais e suas pendências não entram na análise: só as condições do contrato.
+            </p>
+          </div>
+          <div class="rv">
+            <div class="gp fy pv">
+              <div class="ph">
+                <span class="ic" style="color: var(--k)">
+                  <svg viewBox="0 0 24 24">
+                    <rect x="5" y="11" width="14" height="9" rx="2" />
+                    <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                  </svg>
+                </span>
+                Contrato anonimizado
+              </div>
+              <div class="pvu">
+                <div class="av">
+                  <i class="rg"></i>
+                  <i class="rg r2"></i>
+                  <svg viewBox="0 0 48 48">
+                    <circle cx="24" cy="18" r="8" />
+                    <path d="M9 40c2-8 8-12 15-12s13 4 15 12" />
+                  </svg>
+                  <span class="lk">
+                    <svg viewBox="0 0 24 24">
+                      <rect x="5" y="11" width="14" height="9" rx="2" />
+                      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                    </svg>
+                  </span>
+                </div>
+                <div><b>Você</b> <small>Nome, documento, endereço e situação financeira ficam protegidos.</small></div>
+              </div>
+              <div>
+                <div class="rw" style="--j: 0">
+                  <span>Nome</span>
+                  <span class="rx"><em>Maria A. Oliveira</em><i></i></span>
+                </div>
+                <div class="rw" style="--j: 1">
+                  <span>CPF</span>
+                  <span class="rx"><em>123.456.789-00</em><i></i></span>
+                </div>
+                <div class="rw" style="--j: 2">
+                  <span>Endereço</span>
+                  <span class="rx"><em>Rua das Flores, 100</em><i></i></span>
+                </div>
+                <div class="rw" style="--j: 3">
+                  <span>Pendências no seu nome</span>
+                  <span class="rx"><em>2 registros</em><i></i></span>
+                </div>
+                <div class="rw ck" style="--j: 4">
+                  <span>Juros e tarifas</span>
+                  <b class="ok">analisado</b>
+                </div>
+                <div class="rw ck" style="--j: 5">
+                  <span>Prazo e condições</span>
+                  <b class="ok">analisado</b>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      if (campoPdf.files.length === 0) {
-        status.textContent = "Selecione um PDF primeiro.";
-        status.className = "erro";
-        return;
-      }
+      <!-- 8 · Como vai funcionar -->
+      <section class="bn" style="--k: #4fd8c0">
+        <div class="gr">
+          <div>
+            <span class="eb rv">Visão do produto · em desenvolvimento</span>
+            <h2 class="rv">Quatro passos do <span class="b">PDF ao entendimento.</span></h2>
+            <p class="sb rv">
+              Estas etapas descrevem a visão do produto. Hoje existem apenas protótipos de leitura de PDF.
+            </p>
+            <div class="ln rv"></div>
+          </div>
+          <div class="rv">
+            <div class="gp fy">
+              <div class="ph">Como vai funcionar</div>
+              <div class="sp">
+                <div class="sr">
+                  <i class="nm" style="background: #ff5566">1</i>
+                  <div><b>Envie o contrato</b> <small>Um PDF do contrato de financiamento de veículo.</small></div>
+                </div>
+                <div class="sr">
+                  <i class="nm" style="background: #b496ff">2</i>
+                  <div>
+                    <b>Leitura do texto</b>
+                    <small>O sistema lê o documento e organiza o que está escrito.</small>
+                  </div>
+                </div>
+                <div class="sr">
+                  <i class="nm" style="background: #b496ff">3</i>
+                  <div>
+                    <b>Explicação clara</b>
+                    <small>Uma IA explica o contrato em linguagem comum, de forma literal.</small>
+                  </div>
+                </div>
+                <div class="sr">
+                  <i class="nm" style="background: #3ff0a6">4</i>
+                  <div>
+                    <b>Pontos a conferir</b>
+                    <small>Cada ponto vem com a norma que o sustenta e com uma nota de confiabilidade.</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      const arquivo = campoPdf.files[0];
-      nomeBase = arquivo.name.replace(/\.pdf$/i, "");
+      <!-- 9 · Onde estamos -->
+      <section class="bn" style="--k: #4fe8b0">
+        <div class="gr">
+          <div>
+            <span class="eb rv">Onde estamos</span>
+            <h2 class="rv">Hoje existem <span class="b">só protótipos.</span></h2>
+            <p class="sb rv">Esta página é a vitrine do projeto. O que vem depois está em desenvolvimento.</p>
+            <div class="ln rv"></div>
+          </div>
+          <div class="rv">
+            <div class="gp fy">
+              <div class="ph">Linha do tempo</div>
+              <div class="sp">
+                <div class="sr">
+                  <i class="nm" style="background: #3ff0a6">✓</i>
+                  <div>
+                    <b>Agora</b>
+                    <small>Testes de leitura de PDF e esta página, que apresenta a ideia do projeto.</small>
+                  </div>
+                </div>
+                <div class="sr">
+                  <i class="nm" style="background: #b496ff">→</i>
+                  <div><b>Próximo</b> <small>Um site com API de criação própria, para enviar o contrato.</small></div>
+                </div>
+                <div class="sr">
+                  <i class="nm" style="background: #6db4ff">…</i>
+                  <div>
+                    <b>Depois</b>
+                    <small
+                      >IA explicando o contrato, banco de dados (Supabase), comparação com bases públicas, leitura de
+                      fotos e PDFs digitalizados e a nota de confiabilidade.</small
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      const dados = new FormData();
-      dados.append("pdf", arquivo);
-
-      botaoLer.disabled = true;
-      resultado.hidden = true;
-      status.textContent = "Lendo o PDF...";
-      status.className = "";
-
-      try {
-        const resposta = await fetch("/ler-pdf", { method: "POST", body: dados });
-        const json = await resposta.json();
-
-        if (!resposta.ok) {
-          status.textContent = json.erro;
-          status.className = "erro";
-          return;
-        }
-
-        campoTexto.value = json.texto;
-        mostrarAchados(json.achados);
-        status.textContent = json.caracteres.toLocaleString("pt-BR") + " caracteres lidos.";
-        resultado.hidden = false;
-      } catch (erro) {
-        status.textContent = "Não foi possível falar com o servidor. Ele está rodando?";
-        status.className = "erro";
-      } finally {
-        botaoLer.disabled = false;
-      }
-    });
-
-    botaoBaixar.addEventListener("click", function () {
-      const arquivo = new Blob([campoTexto.value], { type: "text/plain;charset=utf-8" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(arquivo);
-      link.download = nomeBase + ".txt";
-      link.click();
-      URL.revokeObjectURL(link.href);
-    });
-  </script>
-</body>
+      <!-- 10 · Chamada final + lista de espera (secoes.js) -->
+      <section class="bn c" style="--k: #3ff0a6">
+        <div class="gr">
+          <div>
+            <h2 class="rv" style="margin: 0 auto">
+              Antes de assinar, <span class="b">entenda o que está escrito.</span>
+            </h2>
+            <form class="wl rv" id="wl">
+              <input type="email" required="" placeholder="seu@email.com" aria-label="Seu e-mail" />
+              <button type="submit">Avise-me</button>
+            </form>
+            <p class="nt rv" id="wlm" style="margin: 1.2em auto 0" aria-live="polite">
+              Prévia da lista de espera: nesta versão de demonstração, nenhum e-mail é enviado ou guardado.
+            </p>
+          </div>
+        </div>
+      </section>
+      <!-- rodapé -->
+      <footer class="ftx">
+        <div class="fwrap">
+          <div class="fb">
+            <div class="flogo">
+              <span class="fmk">
+                <svg viewBox="0 0 24 24">
+                  <path d="M7 3h7l5 5v13H7z" />
+                  <path d="M10 14l2 2 4-4" />
+                </svg>
+              </span>
+              <b>Detector de Cláusulas</b>
+            </div>
+            <p>Leitura assistida de contratos de financiamento de veículos, com cada ponto amarrado na norma.</p>
+            <a class="fpol" href="#">
+              <span><b>Políticas e termos</b> <small>Privacidade, termos de uso e cookies</small></span>
+              <i>→</i>
+            </a>
+          </div>
+          <div class="fcol" role="navigation" aria-label="Rodapé">
+            <h5>Navegação</h5>
+            <a href="#" data-top="">Início</a>
+            <a href="#">Envie seu PDF</a>
+            <a href="#">FAQ</a>
+            <a href="#">Sobre nós</a>
+            <a href="#">Contato</a>
+          </div>
+          <div class="fcol">
+            <h5>Projeto</h5>
+            <span>Projeto integrador</span>
+            <span>Fatec Taquaritinga</span>
+            <span>Protótipo em desenvolvimento</span>
+          </div>
+        </div>
+        <div class="fbot">
+          <span>© 2026 Detector de Cláusulas Abusivas em Contrato</span>
+          <span>Protótipo acadêmico · não é aconselhamento jurídico</span>
+        </div>
+      </footer>
+    </main>
+    <!-- scripts (todos em static/js; o Three.js fica em static/vendor/three, apontado pelo importmap no <head>) -->
+    <script type="module" src="/static/js/efeitos.js"></script>
+    <script type="module" src="/static/js/secoes.js"></script>
+    <script type="module" src="/static/js/iceberg.js"></script>
+    <script type="module" src="/static/js/hero.js"></script>
+    <script type="module" src="/static/js/montanha.js"></script>
+    <script type="module" src="/static/js/carro-comparacao.js"></script>
+  </body>
 </html>
