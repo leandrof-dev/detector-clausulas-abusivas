@@ -115,12 +115,6 @@ export const QUIZ = {
   algumaErrada: 'É por isso que uma leitura assistida ajuda.',
 };
 
-/* ---------- última seção · lista de espera (demonstração: nada é enviado nem guardado) ---------- */
-export const LISTA_DE_ESPERA = {
-  obrigado:
-    'Obrigado! Nesta demonstração o e-mail não foi enviado nem guardado. Quando a lista abrir, este campo vai funcionar de verdade.',
-};
-
 /* ---------- glossário: o primeiro uso de cada termo na página ganha esta explicação ao passar o mouse ---------- */
 export const GLOSSARIO = [
   {

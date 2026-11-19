@@ -1,329 +1,225 @@
-"""banco.py: ponte entre o site (Flask), o Supabase e a OpenAI.
+# Guarda os envios no Supabase: o PDF no armazenamento privado e os dados nas tabelas.
+# Teste de conexão (só lê, não grava nada):  python banco.py
 
-O que este arquivo faz:
-  - guarda o PDF original no armazenamento privado (bucket "contratos");
-  - registra o contrato, o texto lido e as análises no banco;
-  - separa o texto em cláusulas e gera os "embeddings" (usados para comparar contratos);
-  - busca cláusulas parecidas com um texto.
+import hashlib                       # calcula a "impressão digital" (hash) do PDF
+import os                            # lê as variáveis do arquivo .env
+import uuid                          # cria um código único para cada contrato
+from contextlib import suppress      # ignora um erro de propósito (em limpezas que podem falhar sem problema)
+from functools import lru_cache      # guarda a conexão pronta, para não criar uma nova a cada uso
 
-Ele NÃO altera nenhum outro arquivo do projeto. Para usar, o app.py só precisa de:
+from dotenv import load_dotenv       # carrega o arquivo .env para dentro do programa
+from supabase import create_client   # biblioteca oficial do Supabase (banco + armazenamento)
 
-    from banco import guardar_envio, BancoErro
-
-Variáveis do arquivo .env usadas:
-    SUPABASE_URL, SUPABASE_SECRET_KEY  -> acesso ao banco (a chave secret fica só no backend)
-    IA_API_KEY                         -> chave da OpenAI (só para gerar embeddings)
-    MODELO_EMBEDDING     (opcional)    -> padrão: text-embedding-3-large
-    EMBEDDING_DIMENSOES  (opcional)    -> padrão: 1536 (precisa ser igual ao vector(1536) do banco)
-
-Para testar a conexão (não grava nada):
-    python banco.py
-"""
-
-import hashlib
-import os
-import re
-import uuid
-
-from dotenv import load_dotenv
-
-load_dotenv()    # lê o arquivo .env da pasta do projeto (na Vercel as variáveis vêm do painel)
-
-BUCKET = "contratos"
-EMBEDDING_MODELO = os.getenv("MODELO_EMBEDDING", "text-embedding-3-large")
-EMBEDDING_DIMENSOES = int(os.getenv("EMBEDDING_DIMENSOES", "1536"))
-DIMENSOES_DO_BANCO = 1536    # o banco foi criado com vector(1536)
-
-# Enquanto a análise for a do analise.py (sem IA), é isto que vai gravado em "analises"
-MODELO_ATUAL = "regras"
-VERSAO_ATUAL = "regras-v1"
-
-# Cada tipo de cláusula e as palavras que o identificam (a ordem importa: vale o primeiro que achar)
-PALAVRAS_POR_TIPO = [
-    ("cet", ["custo efetivo total"]),
-    ("multa", ["multa"]),
-    ("juros", ["juros"]),
-    ("tarifa", ["tarifa"]),
-    ("seguro", ["seguro"]),
-    ("cancelamento", ["cancelamento", "rescisão", "rescisao"]),
-]
+load_dotenv()
 
 
 class BancoErro(Exception):
-    """Erro com mensagem em português, pronta para mostrar na tela ou no terminal."""
+    """Erro do banco, com a mensagem em português."""
 
 
-# ---------------------------------------------------------------------------
-# Conexões (só são criadas quando alguma função precisa delas)
-# ---------------------------------------------------------------------------
-_clientes = {}
+@lru_cache(maxsize=1)
+def conectar_supabase():
+    """Cria o cliente do Supabase com a URL e a chave secret do .env (só na primeira vez; depois reaproveita)."""
+    url = os.getenv("SUPABASE_URL")
+    chave = os.getenv("SUPABASE_SECRET_KEY")
+
+    if not url or not chave:
+        raise BancoErro("Faltam SUPABASE_URL e/ou SUPABASE_SECRET_KEY no arquivo .env.")
+
+    try:
+        cliente = create_client(url, chave)
+    except Exception as erro:
+        raise BancoErro(f"Não consegui conectar ao Supabase (confira a URL e a chave do .env): {erro}") from erro
+
+    return cliente
 
 
-def _supabase():
-    if "supabase" not in _clientes:
-        url = os.getenv("SUPABASE_URL")
-        chave = os.getenv("SUPABASE_SECRET_KEY")
-        if not url or not chave:
-            raise BancoErro("Faltam SUPABASE_URL e/ou SUPABASE_SECRET_KEY no arquivo .env.")
-        from supabase import create_client
-        _clientes["supabase"] = create_client(url, chave)
-    return _clientes["supabase"]
+def bucket_de_contratos():
+    """Devolve o armazenamento privado onde ficam os PDFs (bucket "contratos")."""
+    bucket = conectar_supabase().storage.from_("contratos")
+    return bucket
 
 
-def _openai():
-    if "openai" not in _clientes:
-        chave = os.getenv("IA_API_KEY")
-        if not chave:
-            raise BancoErro("Falta IA_API_KEY no arquivo .env.")
-        from openai import OpenAI
-        _clientes["openai"] = OpenAI(api_key=chave)
-    return _clientes["openai"]
-
-
-# ---------------------------------------------------------------------------
-# Funções simples (não usam internet)
-# ---------------------------------------------------------------------------
 def calcular_hash(conteudo_pdf):
-    """Impressão digital do PDF: o mesmo arquivo sempre dá o mesmo código."""
-    return hashlib.sha256(conteudo_pdf).hexdigest()
+    """Impressão digital do PDF: o mesmo arquivo sempre dá o mesmo código de 64 caracteres."""
+    codigo = hashlib.sha256(conteudo_pdf).hexdigest()
+    return codigo
 
 
-def classificar_tipo(texto):
-    """Diz de que assunto é a cláusula (juros, multa...), usando as mesmas palavras do analise.py."""
-    minusculo = texto.lower()
-    for tipo, palavras in PALAVRAS_POR_TIPO:
-        for palavra in palavras:
-            if palavra in minusculo:
-                return tipo
-    return "outro"
+def formatar_vetor(vetor):
+    """Transforma a lista de números no texto que o banco entende: "[0.1,0.2,...]"."""
+    texto = "[" + ",".join(str(numero) for numero in vetor) + "]"
+    return texto
 
 
-def separar_clausulas(texto, tamanho_minimo=120, tamanho_maximo=2000):
-    """Quebra o texto do contrato em pedaços (cláusulas).
-
-    Versão simples: corta nos títulos "CLÁUSULA ..." e nas linhas em branco, junta pedaços muito
-    curtos e divide os muito longos. Mais tarde dá para trocar por uma separação feita pela IA.
-    """
-    texto = texto.replace("\x00", "").replace("\r", "")
-    corte = re.compile(r"\n\s*\n|^(?=\s*cl[aá]usula\s+\S+)", re.IGNORECASE | re.MULTILINE)
-
-    clausulas = []
-    atual = ""
-    for bloco in corte.split(texto):
-        bloco = " ".join(bloco.split())    # tira quebras de linha e espaços repetidos
-        if bloco == "":
-            continue
-        atual = (atual + " " + bloco).strip()
-        if len(atual) >= tamanho_minimo:
-            clausulas.append(atual)
-            atual = ""
-    if atual != "":    # sobrou um pedaço curto no final: junta com o anterior
-        if clausulas:
-            clausulas[-1] += " " + atual
-        else:
-            clausulas.append(atual)
-
-    resultado = []
-    for clausula in clausulas:
-        while len(clausula) > tamanho_maximo:    # divide os pedaços muito longos, de preferência no fim de uma frase
-            ponto = clausula.rfind(". ", 0, tamanho_maximo)
-            ponto = ponto + 1 if ponto > 0 else tamanho_maximo
-            resultado.append(clausula[:ponto].strip())
-            clausula = clausula[ponto:].strip()
-        if clausula != "":
-            resultado.append(clausula)
-    return resultado
-
-
-def _formatar_vetor(vetor):
-    """Transforma a lista de números no formato de texto que o banco entende: [0.1,0.2,...]"""
-    return "[" + ",".join(str(numero) for numero in vetor) + "]"
-
-
-# ---------------------------------------------------------------------------
-# IA (embeddings)
-# ---------------------------------------------------------------------------
-def gerar_embeddings(textos):
-    """Devolve um vetor (lista de 1536 números) para cada texto, na mesma ordem."""
-    if not textos:
-        return []
-    if EMBEDDING_DIMENSOES != DIMENSOES_DO_BANCO:
-        raise BancoErro(
-            f"EMBEDDING_DIMENSOES={EMBEDDING_DIMENSOES}, mas o banco usa vector({DIMENSOES_DO_BANCO}). "
-            "Os dois precisam ser iguais."
-        )
-    cliente = _openai()
-    vetores = []
-    for inicio in range(0, len(textos), 100):    # a OpenAI recebe vários textos por chamada
-        lote = textos[inicio:inicio + 100]
-        try:
-            resposta = cliente.embeddings.create(
-                model=EMBEDDING_MODELO, input=lote, dimensions=EMBEDDING_DIMENSOES
-            )
-        except Exception as erro:
-            raise BancoErro(f"Não consegui gerar os embeddings: {erro}") from erro
-        vetores.extend(item.embedding for item in sorted(resposta.data, key=lambda item: item.index))
-    return vetores
-
-
-# ---------------------------------------------------------------------------
-# Banco de dados
-# ---------------------------------------------------------------------------
-def guardar_contrato(nome_arquivo, conteudo_pdf, texto, paginas=None, origem="teste"):
+def guardar_contrato(nome_arquivo, conteudo_pdf, texto, paginas, origem="teste"):
     """Guarda o PDF no armazenamento e cria o registro do contrato. Devolve o id do contrato.
 
     O mesmo PDF pode ser enviado várias vezes: cada envio vira um contrato novo.
-    origem: "teste" enquanto você testa; troque para "producao" quando for para valer.
+    origem: "teste" enquanto o projeto está em testes; troque para "producao" quando for para valer.
     """
-    cliente = _supabase()
     contrato_id = str(uuid.uuid4())
     caminho = f"{contrato_id}.pdf"
+    linha = {
+        "id": contrato_id,
+        "nome_arquivo": nome_arquivo,
+        "hash_sha256": calcular_hash(conteudo_pdf),
+        "caminho_storage": caminho,
+        "tamanho_bytes": len(conteudo_pdf),
+        "paginas": paginas,
+        "texto_extraido": texto.replace("\x00", ""),    # o banco não aceita o caractere nulo
+        "anonimizado": False,
+        "origem": origem,
+        "status": "lido",
+    }
+    cliente = conectar_supabase()
+    bucket = bucket_de_contratos()
 
     try:
-        cliente.storage.from_(BUCKET).upload(
-            path=caminho,
-            file=conteudo_pdf,
-            file_options={"content-type": "application/pdf"},
-        )
+        bucket.upload(path=caminho, file=conteudo_pdf, file_options={"content-type": "application/pdf"})
     except Exception as erro:
         raise BancoErro(f"Não consegui guardar o PDF no armazenamento: {erro}") from erro
 
     try:
-        cliente.table("contratos").insert({
-            "id": contrato_id,
-            "nome_arquivo": nome_arquivo,
-            "hash_sha256": calcular_hash(conteudo_pdf),
-            "caminho_storage": caminho,
-            "tamanho_bytes": len(conteudo_pdf),
-            "paginas": paginas,
-            "texto_extraido": texto.replace("\x00", ""),    # o banco não aceita o caractere nulo
-            "anonimizado": False,
-            "origem": origem,
-            "status": "lido",
-        }).execute()
+        cliente.table("contratos").insert(linha).execute()
     except Exception as erro:
-        try:    # desfaz o upload para não sobrar um PDF sem registro
-            cliente.storage.from_(BUCKET).remove([caminho])
-        except Exception:
-            pass
+        with suppress(Exception):    # desfaz o upload para não sobrar um PDF sem registro
+            bucket.remove([caminho])
         raise BancoErro(f"Não consegui registrar o contrato no banco: {erro}") from erro
 
     return contrato_id
 
 
-def guardar_analise(contrato_id, resultado, modelo=MODELO_ATUAL, versao_prompt=VERSAO_ATUAL, nota=None):
+def guardar_analise(contrato_id, resultado, modelo, versao_prompt, nota=None):
     """Guarda uma análise do contrato (pode haver várias por contrato). Devolve o id da análise.
 
-    resultado: qualquer lista/dicionário simples (por exemplo, o que o analisar() devolve).
+    resultado: lista ou dicionário simples com o que a análise encontrou.
+    modelo e versao_prompt: quem fez a análise e com qual versão do prompt (ficam registrados para comparar depois).
     nota: de 0 a 100, ou None.
     """
-    cliente = _supabase()
+    linha = {
+        "contrato_id": contrato_id,
+        "modelo": modelo,
+        "versao_prompt": versao_prompt,
+        "resultado": resultado,
+        "nota_confiabilidade": nota,
+    }
+    cliente = conectar_supabase()
+
     try:
-        resposta = cliente.table("analises").insert({
-            "contrato_id": contrato_id,
-            "modelo": modelo,
-            "versao_prompt": versao_prompt,
-            "resultado": resultado,
-            "nota_confiabilidade": nota,
-        }).execute()
+        resposta = cliente.table("analises").insert(linha).execute()
         cliente.table("contratos").update({"status": "analisado"}).eq("id", contrato_id).execute()
     except Exception as erro:
         raise BancoErro(f"Não consegui guardar a análise: {erro}") from erro
-    return resposta.data[0]["id"]
+
+    analise_id = resposta.data[0]["id"]
+    return analise_id
 
 
-def guardar_clausulas(contrato_id, texto, com_embeddings=True):
-    """Separa o texto em cláusulas e guarda cada uma (com o embedding, para comparar depois)."""
-    pedacos = separar_clausulas(texto)
-    if not pedacos:
-        return 0
+def guardar_clausulas(contrato_id, clausulas):
+    """Guarda as cláusulas de um contrato e devolve quantas foram guardadas.
 
-    vetores = gerar_embeddings(pedacos) if com_embeddings else [None] * len(pedacos)
+    clausulas: lista de {"ordem", "tipo", "texto", "embedding"}; o embedding pode ser None.
+    """
+    tamanho_do_lote = 50    # envia aos poucos para não ficar pesado
     linhas = []
-    for ordem, (pedaco, vetor) in enumerate(zip(pedacos, vetores), start=1):
+    cliente = conectar_supabase()
+
+    for clausula in clausulas:
         linhas.append({
             "contrato_id": contrato_id,
-            "ordem": ordem,
-            "tipo": classificar_tipo(pedaco),
-            "texto": pedaco,
-            "embedding": _formatar_vetor(vetor) if vetor is not None else None,
+            "ordem": clausula["ordem"],
+            "tipo": clausula["tipo"],
+            "texto": clausula["texto"],
+            "embedding": formatar_vetor(clausula["embedding"]) if clausula["embedding"] is not None else None,
         })
 
-    cliente = _supabase()
     try:
-        for inicio in range(0, len(linhas), 50):    # envia aos poucos para não ficar pesado
-            cliente.table("clausulas").insert(linhas[inicio:inicio + 50]).execute()
+        for inicio in range(0, len(linhas), tamanho_do_lote):
+            cliente.table("clausulas").insert(linhas[inicio:inicio + tamanho_do_lote]).execute()
     except Exception as erro:
         raise BancoErro(f"Não consegui guardar as cláusulas: {erro}") from erro
-    return len(linhas)
+
+    quantidade = len(linhas)
+    return quantidade
 
 
 def marcar_erro(contrato_id):
-    """Marca o contrato com status "erro" (use quando algo falhar depois de guardá-lo)."""
-    try:
-        _supabase().table("contratos").update({"status": "erro"}).eq("id", contrato_id).execute()
-    except Exception:
-        pass
+    """Marca o contrato com status "erro" (usado quando algo falha depois de ele já estar guardado)."""
+    with suppress(Exception):
+        conectar_supabase().table("contratos").update({"status": "erro"}).eq("id", contrato_id).execute()
 
 
-def guardar_envio(nome_arquivo, conteudo_pdf, texto, achados, paginas=None, origem="teste", com_embeddings=True):
-    """Faz tudo de uma vez para um PDF enviado no site. É a função que o app.py chama.
-
-    Passos: guarda o PDF e o texto -> guarda a análise (os "achados" do analise.py) -> guarda as cláusulas.
-    Devolve um dicionário com os ids e quantos itens foram guardados.
-    Se o PDF e a análise forem guardados mas as cláusulas falharem, o envio continua valendo
-    e o problema vem no campo "aviso".
-    """
-    contrato_id = guardar_contrato(nome_arquivo, conteudo_pdf, texto, paginas, origem)
-    analise_id = guardar_analise(contrato_id, achados)
-
-    aviso = None
-    quantidade = 0
-    try:
-        quantidade = guardar_clausulas(contrato_id, texto, com_embeddings)
-    except BancoErro as erro:
-        aviso = f"PDF e análise guardados, mas as cláusulas não: {erro}"
-
-    return {
-        "contrato_id": contrato_id,
-        "analise_id": analise_id,
-        "clausulas": quantidade,
-        "aviso": aviso,
-    }
-
-
-def buscar_clausulas_parecidas(texto, limite=5, tipo=None):
-    """Acha, entre as cláusulas já guardadas, as mais parecidas com o texto.
+def buscar_clausulas_parecidas(vetor, limite=5, tipo=None):
+    """Para as comparações futuras: devolve as cláusulas guardadas mais parecidas com o vetor.
 
     tipo: "juros", "multa"... para procurar só naquele assunto (ou None para todos).
-    Devolve uma lista de dicionários com tipo, texto e similaridade (1.0 = idêntica).
+    Cada item tem tipo, texto e similaridade (1.0 = idêntica).
     """
-    vetor = gerar_embeddings([texto])[0]
+    parametros = {"consulta": formatar_vetor(vetor), "limite": limite, "tipo_filtro": tipo}
+    cliente = conectar_supabase()
+
     try:
-        resposta = _supabase().rpc("buscar_clausulas_parecidas", {
-            "consulta": _formatar_vetor(vetor),
-            "limite": limite,
-            "tipo_filtro": tipo,
-        }).execute()
+        resposta = cliente.rpc("buscar_clausulas_parecidas", parametros).execute()
     except Exception as erro:
         raise BancoErro(f"Não consegui buscar cláusulas parecidas: {erro}") from erro
-    return resposta.data
+
+    parecidas = resposta.data
+    return parecidas
 
 
-# ---------------------------------------------------------------------------
-# Teste de conexão: python banco.py   (só lê, não grava nada)
-# ---------------------------------------------------------------------------
+def contar_contratos_da_base(hash_excluido):
+    """Quantos PDFs DIFERENTES há na base, sem contar o PDF de hash_excluido (os reenvios do mesmo arquivo contam uma vez)."""
+    cliente = conectar_supabase()
+
+    try:
+        resposta = cliente.table("contratos").select("hash_sha256").neq("hash_sha256", hash_excluido).limit(1000).execute()
+    except Exception as erro:
+        raise BancoErro(f"Não consegui contar os contratos da base: {erro}") from erro
+
+    quantidade = len({linha["hash_sha256"] for linha in resposta.data})
+    return quantidade
+
+
+def buscar_clausulas_de_outros_contratos(vetor, hash_excluido, limite=3, tipo=None):
+    """Acha as cláusulas mais parecidas com o vetor, só em contratos de outro PDF (hash diferente).
+
+    Cada item tem tipo, similaridade (1.0 = idêntica), clausula_id e contrato_id.
+    """
+    parametros = {
+        "consulta": formatar_vetor(vetor),
+        "hash_excluido": hash_excluido,
+        "limite": limite,
+        "tipo_filtro": tipo,
+    }
+    cliente = conectar_supabase()
+
+    try:
+        resposta = cliente.rpc("buscar_clausulas_de_outros_contratos", parametros).execute()
+    except Exception as erro:
+        raise BancoErro(f"Não consegui comparar com os outros contratos: {erro}") from erro
+
+    parecidas = resposta.data
+    return parecidas
+
+
 def testar_conexao():
-    cliente = _supabase()
+    """Lê a tabela de contratos e o armazenamento, sem gravar nada. Devolve a mensagem de sucesso."""
+    cliente = conectar_supabase()
+
     cliente.table("contratos").select("id", count="exact").limit(1).execute()
-    cliente.storage.from_(BUCKET).list()
-    print("Conexão com o Supabase OK (banco e armazenamento).")
+    bucket_de_contratos().list()
+
+    mensagem = "Conexão com o Supabase OK (banco e armazenamento)."
+    return mensagem
 
 
 if __name__ == "__main__":
     try:
-        testar_conexao()
+        resultado = testar_conexao()
     except BancoErro as erro:
-        print(f"Erro: {erro}")
+        resultado = f"Erro: {erro}"
     except Exception as erro:
-        print(f"Não foi possível conectar: {erro}")
+        resultado = f"Não foi possível conectar: {erro}"
+
+    print(resultado)

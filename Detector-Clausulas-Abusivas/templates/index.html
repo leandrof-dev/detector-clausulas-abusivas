@@ -629,20 +629,18 @@
         </div>
       </section>
 
-      <!-- 8 · Como vai funcionar -->
+      <!-- 8 · Como funciona -->
       <section class="bn" style="--k: #4fd8c0">
         <div class="gr">
           <div>
-            <span class="eb rv">Visão do produto · em desenvolvimento</span>
-            <h2 class="rv">Quatro passos do <span class="b">PDF ao entendimento.</span></h2>
-            <p class="sb rv">
-              Estas etapas descrevem a visão do produto. Hoje existem apenas protótipos de leitura de PDF.
-            </p>
+            <span class="eb rv">Como funciona</span>
+            <h2 class="rv">Cinco passos do <span class="b">PDF ao entendimento.</span></h2>
+            <p class="sb rv">Do envio do contrato à nota de confiabilidade: todas as etapas já rodam no protótipo.</p>
             <div class="ln rv"></div>
           </div>
           <div class="rv">
             <div class="gp fy">
-              <div class="ph">Como vai funcionar</div>
+              <div class="ph">Como funciona</div>
               <div class="sp">
                 <div class="sr">
                   <i class="nm" style="background: #ff5566">1</i>
@@ -652,7 +650,7 @@
                   <i class="nm" style="background: #b496ff">2</i>
                   <div>
                     <b>Leitura do texto</b>
-                    <small>O sistema lê o documento e organiza o que está escrito.</small>
+                    <small>O sistema lê o documento e separa o texto em cláusulas.</small>
                   </div>
                 </div>
                 <div class="sr">
@@ -663,10 +661,20 @@
                   </div>
                 </div>
                 <div class="sr">
-                  <i class="nm" style="background: #3ff0a6">4</i>
+                  <i class="nm" style="background: #b496ff">4</i>
                   <div>
                     <b>Pontos a conferir</b>
-                    <small>Cada ponto vem com a norma que o sustenta e com uma nota de confiabilidade.</small>
+                    <small>Cada ponto vem com o trecho do contrato e a norma que o sustenta.</small>
+                  </div>
+                </div>
+                <div class="sr">
+                  <i class="nm" style="background: #3ff0a6">5</i>
+                  <div>
+                    <b>Comparação</b>
+                    <small
+                      >As cláusulas são comparadas com as de contratos já analisados e viram a nota de
+                      confiabilidade.</small
+                    >
                   </div>
                 </div>
               </div>
@@ -680,8 +688,11 @@
         <div class="gr">
           <div>
             <span class="eb rv">Onde estamos</span>
-            <h2 class="rv">Hoje existem <span class="b">só protótipos.</span></h2>
-            <p class="sb rv">Esta página é a vitrine do projeto. O que vem depois está em desenvolvimento.</p>
+            <h2 class="rv">O protótipo já <span class="b">funciona de ponta a ponta.</span></h2>
+            <p class="sb rv">
+              Já dá para enviar um contrato e receber a leitura da IA, os pontos a conferir e a nota. A linha do tempo
+              mostra o que falta.
+            </p>
             <div class="ln rv"></div>
           </div>
           <div class="rv">
@@ -691,21 +702,37 @@
                 <div class="sr">
                   <i class="nm" style="background: #3ff0a6">✓</i>
                   <div>
-                    <b>Agora</b>
-                    <small>Testes de leitura de PDF e esta página, que apresenta a ideia do projeto.</small>
+                    <b>Pronto</b>
+                    <small
+                      >Envio do PDF, leitura do texto, explicação pela IA, pontos a conferir com a norma, banco de dados
+                      (Supabase) e nota de confiabilidade.</small
+                    >
                   </div>
                 </div>
                 <div class="sr">
                   <i class="nm" style="background: #b496ff">→</i>
-                  <div><b>Próximo</b> <small>Um site com API de criação própria, para enviar o contrato.</small></div>
+                  <div>
+                    <b>Agora</b>
+                    <small
+                      >Alimentar a base com mais contratos, para a nota ficar mais confiável, e sincronizar uma
+                      personalidade à IA, focada em respostas sobre contratos.</small
+                    >
+                  </div>
                 </div>
                 <div class="sr">
-                  <i class="nm" style="background: #6db4ff">…</i>
+                  <i class="nm" style="background: #6db4ff">↗</i>
+                  <div>
+                    <b>Próximo</b>
+                    <small>Publicar o site na internet (Vercel) e criar a página de políticas e termos.</small>
+                  </div>
+                </div>
+                <div class="sr">
+                  <i class="nm" style="background: #8d9bff">…</i>
                   <div>
                     <b>Depois</b>
                     <small
-                      >IA explicando o contrato, banco de dados (Supabase), comparação com bases públicas, leitura de
-                      fotos e PDFs digitalizados e a nota de confiabilidade.</small
+                      >Comparação com bases públicas (taxas do Banco Central), leitura de fotos e PDFs digitalizados e
+                      revisão jurídica das normas que a IA usa.</small
                     >
                   </div>
                 </div>
@@ -715,49 +742,28 @@
         </div>
       </section>
 
-      <!-- 10 · Chamada final + lista de espera (secoes.js) -->
+      <!-- 10 · Chamada final + chamada final -->
       <section class="bn c" style="--k: #3ff0a6">
         <div class="gr">
           <div>
             <h2 class="rv" style="margin: 0 auto">
               Antes de assinar, <span class="b">entenda o que está escrito.</span>
             </h2>
-            <form class="wl rv" id="wl">
-              <input type="email" required="" placeholder="seu@email.com" aria-label="Seu e-mail" />
-              <button type="submit">Avise-me</button>
-            </form>
-            <p class="nt rv" id="wlm" style="margin: 1.2em auto 0" aria-live="polite">
-              Prévia da lista de espera: nesta versão de demonstração, nenhum e-mail é enviado ou guardado.
-            </p>
+            <a class="cta-verde rv" href="/enviar_pdf">Enviar meu PDF</a>
           </div>
         </div>
       </section>
       <!-- rodapé -->
       <footer class="ftx">
         <div class="fwrap">
-          <div class="fb">
-            <div class="flogo">
-              <span class="fmk">
-                <svg viewBox="0 0 24 24">
-                  <path d="M7 3h7l5 5v13H7z" />
-                  <path d="M10 14l2 2 4-4" />
-                </svg>
-              </span>
-              <b>Detector de Cláusulas</b>
-            </div>
-            <p>Leitura assistida de contratos de financiamento de veículos, com cada ponto amarrado na norma.</p>
-            <a class="fpol" href="#">
-              <span><b>Políticas e termos</b> <small>Privacidade, termos de uso e cookies</small></span>
-              <i>→</i>
-            </a>
-          </div>
           <div class="fcol" role="navigation" aria-label="Rodapé">
             <h5>Navegação</h5>
-            <a href="#" data-top="">Início</a>
-            <a href="#">Envie seu PDF</a>
-            <a href="#">FAQ</a>
-            <a href="#">Sobre nós</a>
-            <a href="#">Contato</a>
+            <a href="/" data-top="">Início</a>
+            <a href="/enviar_pdf">Envie seu PDF</a>
+            <a href="/faq">FAQ</a>
+            <a href="/sobre">Sobre nós</a>
+            <a href="/contato">Contato</a>
+            <a href="#">Políticas e termos</a>
           </div>
           <div class="fcol">
             <h5>Projeto</h5>

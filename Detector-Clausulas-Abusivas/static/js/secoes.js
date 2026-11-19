@@ -1,7 +1,7 @@
 /* Interações de cada seção da página, na ordem em que aparecem:
    iceberg (faixas) · caso real · apontamentos · montanha (controle) · rodapé · antes × depois · quiz ·
    lista de espera · glossário. As partes 3D ficam em iceberg.js, montanha.js e carro-comparacao.js. */
-import { ANTES_DEPOIS, CASO_REAL, GLOSSARIO, ICEBERG, LISTA_DE_ESPERA, MONTANHA, QUIZ } from './conteudo.js';
+import { ANTES_DEPOIS, CASO_REAL, GLOSSARIO, ICEBERG, MONTANHA, QUIZ } from './conteudo.js';
 import { formatarDecimal, formatarReais, limitar, movimentoReduzido, parcelaPrice, suave } from './util.js';
 
 /* contador animado: o número "corre" do valor atual até o novo */
@@ -255,12 +255,16 @@ function iniciarMontanha() {
   mostrarDistancia(distanciaPelaRolagem());
 }
 
-/* ---------- rodapé: os links ainda não têm destino (só "Início" volta ao topo) ---------- */
+/* ---------- rodapé: os links das páginas funcionam normalmente; "Início" volta ao topo e "#" ainda não tem destino ---------- */
 function iniciarRodape() {
   document.querySelectorAll('.ftx a').forEach((link) =>
     link.addEventListener('click', (evento) => {
-      evento.preventDefault();
-      if (link.hasAttribute('data-top')) scrollTo({ top: 0, behavior: 'smooth' });
+      if (link.hasAttribute('data-top')) {
+        evento.preventDefault();
+        scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (link.getAttribute('href') === '#') {
+        evento.preventDefault();
+      }
     }),
   );
 }
@@ -361,17 +365,6 @@ function iniciarQuiz() {
   });
 }
 
-/* ---------- lista de espera (demonstração: nada é enviado nem guardado) ---------- */
-function iniciarListaDeEspera() {
-  const formulario = document.getElementById('wl');
-  if (!formulario) return;
-  formulario.addEventListener('submit', (evento) => {
-    evento.preventDefault();
-    document.getElementById('wlm').textContent = LISTA_DE_ESPERA.obrigado;
-    formulario.reset();
-  });
-}
-
 /* ---------- glossário: o primeiro uso de cada termo vira <span class="gl"> com explicação ao passar o mouse ou focar ---------- */
 function iniciarGlossario() {
   const balao = document.createElement('div');
@@ -439,5 +432,4 @@ iniciarMontanha();
 iniciarRodape();
 iniciarAntesDepois();
 iniciarQuiz();
-iniciarListaDeEspera();
 iniciarGlossario();

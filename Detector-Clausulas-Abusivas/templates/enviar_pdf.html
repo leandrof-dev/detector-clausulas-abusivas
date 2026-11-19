@@ -1,11 +1,233 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Envie seu PDF</title>
-</head>
-<body>
-<p>Você está em enviar_pdf.html</p>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>Envie seu PDF</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..800&amp;display=swap" />
+    <!-- style.css = visual geral do site (menu, rodapé, faixas e cartões); enviar-pdf.css = só o que é desta página -->
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <link rel="stylesheet" href="/static/css/enviar-pdf.css" />
+  </head>
+  <body class="pagina-envio">
+    <!-- MENU (o mesmo da página inicial; aqui "Envie seu PDF" é a página atual) -->
+    <header class="env-topo">
+      <nav>
+        <a href="/">Início</a>
+        <a href="/enviar_pdf" class="on" aria-current="page">Envie seu PDF</a>
+        <a href="/faq">FAQ</a>
+        <a href="/sobre">Sobre nós</a>
+        <a href="/contato">Contato</a>
+      </nav>
+    </header>
+
+    <main class="env-principal" id="env-principal">
+      <!-- FAIXA 1 · JANELA DE ENVIO (no centro da tela) -->
+      <section class="bn env-envio" aria-label="Enviar contrato" style="--k: #7fd4ff; --tk: #7fd4ff">
+        <i class="bgl"></i>
+        <div class="env-janela-envio">
+          <form id="env-formulario" novalidate>
+            <!-- clicar ou arrastar o PDF para cá; depois de escolher, o nome do arquivo ocupa o lugar do título -->
+            <label class="env-solta" id="env-solta" for="env-arquivo">
+              <input class="env-oculto" type="file" id="env-arquivo" name="pdf" accept="application/pdf,.pdf" />
+              <svg class="env-icone-envio" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 3h7l5 5v13H7z" />
+                <path d="M14 3v5h5M12 18v-6M9.5 14.5L12 12l2.5 2.5" />
+              </svg>
+              <svg class="env-icone-ok" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 3h7l5 5v13H7z" />
+                <path d="M14 3v5h5M9.5 14.5l2 2 3.5-4" />
+              </svg>
+              <strong id="env-solta-titulo">Arraste o PDF para cá</strong>
+              <span id="env-solta-sub">ou <u>escolha um arquivo</u></span>
+              <small id="env-solta-dica">PDF com texto selecionável · até 50 MB</small>
+            </label>
+            <button class="env-botao" id="env-analisar" type="submit" disabled>Analisar contrato</button>
+          </form>
+
+          <!-- enquanto o servidor lê e analisa -->
+          <div class="env-estado" id="env-estado" role="status" aria-live="polite" hidden>
+            <div class="env-barra" aria-hidden="true"><i></i></div>
+            <p id="env-estado-texto"></p>
+          </div>
+
+          <!-- se algo der errado -->
+          <div class="env-erro" id="env-erro" role="alert" hidden></div>
+        </div>
+      </section>
+
+      <!-- RESULTADO: 3 faixas, que só aparecem depois da análise -->
+      <div id="env-resultado" tabindex="-1" hidden>
+        <!-- FAIXA 2 · LEITURA DA IA, em linguagem simples -->
+        <section class="bn env-faixa" aria-labelledby="env-leitura-titulo" style="--k: #7fd4ff; --tk: #8d99ae">
+          <i class="bgl"></i>
+          <div class="gr">
+            <div>
+              <span class="eb">Leitura da IA</span>
+              <h2 id="env-leitura-titulo">O que o seu contrato diz, <span class="b">em linguagem simples.</span></h2>
+              <p class="sb" id="env-leitura-tipo"></p>
+              <div class="ln"></div>
+            </div>
+            <div class="gp fy env-card">
+              <div class="ph">
+                <span class="ic" style="color: var(--k)">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M7 3h7l5 5v13H7z" />
+                    <path d="M14 3v5h5M10 13h6M10 17h4" />
+                  </svg>
+                </span>
+                <h3>Resumo</h3>
+              </div>
+              <p class="env-manchete" id="env-manchete"></p>
+              <ul class="env-resumo" id="env-resumo"></ul>
+              <div class="env-fatos">
+                <span id="env-fato-paginas"></span>
+                <span id="env-fato-caracteres"></span>
+              </div>
+              <p class="env-aviso" id="env-avisos" hidden></p>
+            </div>
+          </div>
+        </section>
+
+        <!-- FAIXA 3 · PONTOS A CONFERIR -->
+        <section class="bn env-faixa" aria-labelledby="env-pontos-titulo" style="--k: #ff6b7d; --tk: #8d99ae">
+          <i class="bgl"></i>
+          <div class="gr">
+            <div>
+              <span class="eb">Pontos a conferir</span>
+              <h2 id="env-pontos-titulo">O que vale olhar com <span class="b">mais atenção.</span></h2>
+              <p class="sb">
+                Toque em cada ponto para ler a explicação, o trecho do contrato e a norma que o sustenta.
+              </p>
+              <div class="ln"></div>
+            </div>
+            <div class="gp fy env-card" data-tilt="soft">
+              <div class="ph">
+                <span class="ic" style="color: var(--k)">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="6.5" />
+                    <path d="M20 20l-4.2-4.2" />
+                  </svg>
+                </span>
+                <h3>Pontos a conferir</h3>
+                <span class="env-contagem" id="env-contagem"></span>
+              </div>
+              <ul class="env-lista" id="env-lista"></ul>
+              <p class="env-vazio" id="env-vazio" hidden>
+                A IA não destacou nenhum ponto neste documento. Isso não garante que o contrato esteja sem problemas.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- FAIXA 4 · GRÁFICO DE CONFIABILIDADE (comparação com os contratos já analisados) -->
+        <section
+          class="bn env-faixa"
+          id="env-faixa-nota"
+          aria-labelledby="env-nota-titulo"
+          style="--k: #3ff0a6; --tk: #8d99ae"
+        >
+          <i class="bgl"></i>
+          <div class="gr">
+            <div>
+              <span class="eb">Nota de confiabilidade</span>
+              <h2 id="env-nota-titulo">Quanto o contrato <span class="b">foge da curva?</span></h2>
+              <p class="sb">
+                A nota compara as cláusulas deste contrato com as de contratos já analisados. Quanto mais fora da curva,
+                menor a confiabilidade da análise.
+              </p>
+              <div class="ln"></div>
+              <p class="nt">É análise, não veredito jurídico.</p>
+            </div>
+            <div class="gp fy env-card">
+              <div class="ph">
+                <span class="ic" style="color: var(--k)">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M4 19V9M10 19V5M16 19v-7M22 19H2" />
+                  </svg>
+                </span>
+                <h3>Nota de confiabilidade</h3>
+                <button class="env-link" id="env-como-nota" type="button">Como é calculada?</button>
+              </div>
+              <div class="env-grafico">
+                <svg class="env-rosca" viewBox="0 0 120 120" role="img" aria-labelledby="env-rosca-rotulo">
+                  <title id="env-rosca-rotulo">Nota de confiabilidade</title>
+                  <circle class="env-rosca-fundo" cx="60" cy="60" r="50" />
+                  <circle class="env-rosca-valor" id="env-rosca-valor" cx="60" cy="60" r="50" pathLength="100" />
+                  <text class="env-rosca-numero" id="env-rosca-numero" x="60" y="68" text-anchor="middle">–</text>
+                </svg>
+                <div class="env-legenda">
+                  <strong id="env-nota-situacao"></strong>
+                  <p id="env-nota-texto"></p>
+                </div>
+              </div>
+              <ul class="env-barras" id="env-barras"></ul>
+              <p class="env-base" id="env-base"></p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- JANELA "Como é calculada?" (abre pelo botão da faixa de confiabilidade) -->
+    <dialog class="env-dialogo" id="env-dialogo" aria-labelledby="env-dialogo-titulo">
+      <form method="dialog" class="env-dialogo-topo">
+        <h2 id="env-dialogo-titulo">Como esta análise foi feita</h2>
+        <button class="env-fechar" type="submit" aria-label="Fechar">×</button>
+      </form>
+      <ol class="env-etapas">
+        <li>
+          <b>O PDF é lido.</b>
+          O sistema extrai o texto do arquivo. PDFs digitalizados (fotos de papel) ainda não são lidos.
+        </li>
+        <li>
+          <b>A IA escreve a leitura.</b>
+          Uma inteligência artificial lê o texto e explica o contrato em linguagem simples, apontando o que vale
+          conferir e a norma que sustenta cada ponto.
+        </li>
+        <li>
+          <b>As cláusulas são comparadas.</b>
+          Cada cláusula é transformada em números que representam o seu sentido e comparada com as de contratos já
+          analisados.
+        </li>
+        <li>
+          <b>A nota.</b>
+          É a média de quão parecida cada assunto do contrato é com o mais parecido que o sistema já viu (100% = igual).
+          Quanto mais fora da curva, menor a nota. Ela só aparece quando há contratos suficientes na base.
+        </li>
+        <li>
+          <b>Os limites.</b>
+          É uma leitura assistida, não um parecer jurídico. Em caso de dúvida, procure um profissional de direito.
+        </li>
+      </ol>
+      <p class="env-ficha" id="env-ficha" hidden></p>
+    </dialog>
+
+    <!-- RODAPÉ (o mesmo da página inicial, com os links das páginas) -->
+    <footer class="ftx">
+      <div class="fwrap">
+        <div class="fcol" role="navigation" aria-label="Rodapé">
+          <h5>Navegação</h5>
+          <a href="/">Início</a>
+          <a href="/enviar_pdf">Envie seu PDF</a>
+          <a href="/faq">FAQ</a>
+          <a href="/sobre">Sobre nós</a>
+          <a href="/contato">Contato</a>
+          <a href="#">Políticas e termos</a>
+        </div>
+        <div class="fcol">
+          <h5>Projeto</h5>
+          <span>Projeto integrador</span>
+          <span>Fatec Taquaritinga</span>
+          <span>Protótipo em desenvolvimento</span>
+        </div>
+      </div>
+      <div class="fbot">
+        <span>© 2026 Detector de Cláusulas Abusivas em Contrato</span>
+        <span>Protótipo acadêmico · não é aconselhamento jurídico</span>
+      </div>
+    </footer>
+
+    <script type="module" src="/static/js/enviar-pdf.js"></script>
+  </body>
 </html>

@@ -55,10 +55,10 @@ body {
   overflow-x: clip;
 }
 body {
-  font-family: Inter, 'Segoe UI', system-ui, sans-serif;
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
   color: #fff;
   -webkit-font-smoothing: antialiased;
-  font-feature-settings: 'cv11', 'ss03', 'calt';
+  font-feature-settings: "cv11", "ss03", "calt";
   text-rendering: optimizeLegibility;
   font-optical-sizing: auto;
 }
@@ -93,7 +93,7 @@ body {
 }
 /* tom colorido do ambiente: --amb (força) e --acc (cor) vêm do hero.js */
 #hero::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   z-index: 2;
@@ -135,7 +135,7 @@ nav a {
 }
 /* sublinhado que cresce ao passar o mouse */
 nav a::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 50%;
   bottom: 22px;
@@ -160,7 +160,7 @@ nav a.on {
 }
 /* traço azul embaixo da página atual */
 nav a.on::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 50%;
   bottom: -1px;
@@ -345,7 +345,7 @@ nav a.on::after {
   min-height: 1.4em;
 }
 .cap::before {
-  content: '';
+  content: "";
   width: 0.55em;
   height: 0.55em;
   border-radius: 50%;
@@ -409,7 +409,7 @@ nav a.on::after {
   overflow-x: clip;
 }
 #pg::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
@@ -444,7 +444,7 @@ nav a.on::after {
 }
 /* horizonte curvo da transição do topo (--hz: sobe um pouco com a rolagem) */
 #pg::after {
-  content: '';
+  content: "";
   position: absolute;
   left: -25%;
   right: -25%;
@@ -468,7 +468,7 @@ nav a.on::after {
 }
 /* arcos de luz decorativos de cada seção (andam um pouco com o parallax) */
 .bn::before {
-  content: '';
+  content: "";
   position: absolute;
   right: -22%;
   top: -46%;
@@ -481,7 +481,7 @@ nav a.on::after {
   translate: calc(var(--p, 0) * -40px) calc(var(--p, 0) * 30px);
 }
 .bn::after {
-  content: '';
+  content: "";
   position: absolute;
   left: -30%;
   bottom: -64%;
@@ -541,8 +541,8 @@ nav a.on::after {
   padding: 0 5.2vw;
 }
 .bn > .gr {
-  padding-top: clamp(36px, 6vh, 72px);
-  padding-bottom: clamp(36px, 6vh, 72px);
+  padding-top: clamp(64px, 11vh, 130px);
+  padding-bottom: clamp(64px, 11vh, 130px);
 }
 /* última seção (.c): uma coluna, centralizada */
 .bn.c .gr {
@@ -551,8 +551,8 @@ nav a.on::after {
   justify-items: center;
 }
 .bn.c > .gr {
-  padding-top: clamp(56px, 9vh, 110px);
-  padding-bottom: clamp(56px, 9vh, 110px);
+  padding-top: clamp(64px, 11vh, 130px);
+  padding-bottom: clamp(150px, 24vh, 280px);
 }
 
 /* ---------- 4. Títulos e textos das seções ---------- */
@@ -568,7 +568,7 @@ nav a.on::after {
 }
 /* tracinho antes da etiqueta: cresce quando a etiqueta aparece */
 .eb::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 50%;
@@ -761,7 +761,7 @@ nav a.on::after {
 /* reflexo que acompanha o cursor (--mx/--my) */
 .gp::after,
 #panel::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
@@ -775,7 +775,7 @@ nav a.on::after {
 /* borda que acende perto do cursor */
 .gp::before,
 #panel::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: -1px;
   border-radius: inherit;
@@ -837,7 +837,7 @@ nav a.on::after {
   font-weight: 600;
 }
 .ok::before {
-  content: '✓ ';
+  content: "✓ ";
 }
 /* as linhas dos cartões entram uma depois da outra (--i = ordem) */
 .gp .rw,
@@ -862,7 +862,7 @@ nav a.on::after {
   font-size: clamp(13px, 1.05vw, 17px);
 }
 .sp::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 1.2em;
   top: 1.2em;
@@ -873,7 +873,7 @@ nav a.on::after {
   opacity: 0.55;
 }
 .sp::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 1.2em;
   top: 1.2em;
@@ -1124,7 +1124,7 @@ nav a.on::after {
   white-space: nowrap;
 }
 .apc::before {
-  content: '';
+  content: "";
   width: 0.5em;
   height: 0.5em;
   border-radius: 50%;
@@ -1305,7 +1305,7 @@ nav a.on::after {
   text-decoration: none;
 }
 .pdf .lg s::before {
-  content: '';
+  content: "";
   display: inline-block;
   width: 0.6em;
   height: 0.6em;
@@ -1414,7 +1414,7 @@ nav a.on::after {
   outline: none;
 }
 .rt::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 0;
@@ -1425,7 +1425,7 @@ nav a.on::after {
 }
 /* área de toque maior que a barra */
 .rt::after {
-  content: '';
+  content: "";
   position: absolute;
   left: -8px;
   right: -8px;
@@ -1649,7 +1649,7 @@ nav a.on::after {
   pointer-events: none;
 }
 .cmp .dv::after {
-  content: '⇆';
+  content: "⇆";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -2021,43 +2021,23 @@ nav a.on::after {
   margin-bottom: 0.2em;
   color: #fff;
 }
-.wl {
-  display: flex;
-  gap: 0.5em;
-  width: 100%;
-  max-width: 30em;
-  margin: 1.6em auto 0;
-}
-.wl input {
-  flex: 1;
-  min-width: 0;
-  padding: 0.85em 1.2em;
-  border-radius: 40px;
-  border: 1px solid rgba(110, 165, 255, 0.5);
-  background: rgba(10, 16, 32, 0.55);
-  color: #fff;
-  font: inherit;
-  font-size: clamp(14px, 1.05vw, 16px);
-}
-.wl input:focus {
-  outline: none;
-  border-color: var(--k);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--k) 30%, transparent);
-}
-.wl button {
-  padding: 0.85em 1.5em;
-  border: 0;
+.cta-verde {
+  display: inline-block;
+  margin-top: 3em;
+  padding: 0.95em 2.2em;
   border-radius: 40px;
   background: var(--k);
   color: #06101c;
-  font: inherit;
+  font-size: clamp(14px, 1.05vw, 16px);
   font-weight: 650;
-  cursor: pointer;
+  text-decoration: none;
   transition:
     transform 0.2s,
     box-shadow 0.2s;
 }
-.wl button:hover {
+.cta-verde:hover,
+.cta-verde:focus-visible {
+  outline: none;
   transform: translateY(-1px);
   box-shadow: 0 8px 24px color-mix(in srgb, var(--k) 40%, transparent);
 }
@@ -2066,13 +2046,13 @@ nav a.on::after {
 .ftx {
   position: relative;
   z-index: 2;
-  padding: clamp(48px, 8vh, 90px) 5.2vw 24px;
-  background: linear-gradient(180deg, rgba(7, 11, 20, 0), rgba(7, 11, 20, 0.7) 35%, #070b14);
+  padding: clamp(64px, 10vh, 110px) 5.2vw 24px;
+  background: #070b14; /* preto por completo, igual em todas as páginas */
   color: #aab5c8;
   font-size: 14px;
 }
 .ftx::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 5.2vw;
   right: 5.2vw;
@@ -2081,89 +2061,11 @@ nav a.on::after {
   background: linear-gradient(90deg, transparent, rgba(160, 190, 255, 0.35), transparent);
 }
 .fwrap {
-  display: grid;
-  grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(0, 0.75fr));
-  gap: clamp(28px, 4vw, 72px);
+  display: flex;
+  justify-content: flex-start;
+  gap: clamp(48px, 9vw, 160px);
   max-width: 1440px;
   margin: 0 auto;
-}
-.flogo {
-  display: flex;
-  align-items: center;
-  gap: 0.65em;
-  color: #fff;
-  font-size: 17px;
-}
-.fmk {
-  display: grid;
-  place-items: center;
-  width: 2.3em;
-  height: 2.3em;
-  border-radius: 11px;
-  background: linear-gradient(135deg, #ff5566, #b496ff 55%, #3ff0a6);
-  color: #06101c;
-}
-.fmk svg {
-  width: 1.25em;
-  height: 1.25em;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.fb p {
-  max-width: 27em;
-  margin-top: 0.9em;
-  line-height: 1.55;
-}
-/* botão "Políticas e termos" */
-.fpol {
-  display: flex;
-  align-items: center;
-  gap: 1em;
-  max-width: 25em;
-  margin-top: 1.4em;
-  padding: 0.95em 1.15em;
-  border-radius: 14px;
-  border: 1px solid rgba(110, 165, 255, 0.35);
-  background: rgba(16, 24, 42, 0.6);
-  color: #fff;
-  text-decoration: none;
-  transition:
-    border-color 0.25s,
-    transform 0.25s,
-    box-shadow 0.25s;
-}
-.fpol span {
-  flex: 1;
-}
-.fpol b {
-  display: block;
-  font-weight: 600;
-}
-.fpol small {
-  display: block;
-  margin-top: 0.15em;
-  color: #8d99ae;
-  font-size: 0.86em;
-}
-.fpol i {
-  font-style: normal;
-  font-size: 1.2em;
-  color: #9cc2ff;
-  transition: transform 0.25s;
-}
-.fpol:hover,
-.fpol:focus-visible {
-  outline: none;
-  border-color: rgba(156, 194, 255, 0.8);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(40, 90, 200, 0.25);
-}
-.fpol:hover i,
-.fpol:focus-visible i {
-  transform: translateX(5px);
 }
 .fcol h5 {
   margin-bottom: 1em;
@@ -2229,8 +2131,8 @@ nav a.on::after {
     gap: 36px;
   }
   .bn > .gr {
-    padding-top: 44px;
-    padding-bottom: 44px;
+    padding-top: 64px;
+    padding-bottom: 64px;
   }
   .bn h2 {
     max-width: none;
@@ -2254,12 +2156,6 @@ nav a.on::after {
   }
   #mcv {
     height: min(46vh, 380px);
-  }
-  .fwrap {
-    grid-template-columns: 1fr 1fr;
-  }
-  .fb {
-    grid-column: 1/-1;
   }
 }
 /* telas de toque: o cartão fica levemente inclinado e parado (tem de vir depois do bloco acima) */
@@ -2323,9 +2219,6 @@ nav a.on::after {
   }
 }
 @media (max-width: 520px) {
-  .wl {
-    flex-direction: column;
-  }
   .car3 {
     height: 200px;
   }
