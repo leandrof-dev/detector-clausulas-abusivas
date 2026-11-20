@@ -1,9 +1,57 @@
 # O servidor do site: mostra as páginas e recebe os PDFs enviados.
 # Para abrir no computador:  python app.py   e acesse http://localhost:5000
 
+import os                                                      # lê o e-mail de contato do arquivo .env
+
+from dotenv import load_dotenv                                 # carrega o arquivo .env para dentro do programa
 from flask import Flask, jsonify, render_template, request    # Flask: cria o site e as rotas (endereços)
 
 from main_detector import ErroDeEnvio, detectar
+
+load_dotenv()
+
+
+def perguntas_do_faq():
+    """As perguntas e respostas da página FAQ, na ordem em que aparecem (pergunta, resposta)."""
+    perguntas = [
+        (
+            "O que este site faz?",
+            "Você envia o PDF de um contrato de financiamento de veículo e uma IA explica o documento em linguagem "
+            "simples, aponta os pontos que vale conferir e mostra a norma que sustenta cada um.",
+        ),
+        (
+            "Isso é um parecer jurídico?",
+            "Não. É uma leitura assistida, que serve para você entender melhor o contrato. Em caso de dúvida ou "
+            "de conflito com o banco, procure um advogado ou um órgão de defesa do consumidor.",
+        ),
+        (
+            "Que tipo de PDF posso enviar?",
+            "PDFs com texto selecionável, de até 50 MB. PDFs digitalizados (fotos de papel) ainda não são lidos, "
+            "porque o sistema não faz OCR.",
+        ),
+        (
+            "O que significam Atenção, Verificar e Tudo certo?",
+            "Atenção: pode haver cobrança ou cláusula irregular ou abusiva segundo as normas. Verificar: falta "
+            "clareza ou informação, vale confirmar com o banco. Tudo certo: o ponto está claro e de acordo.",
+        ),
+        (
+            "Como é calculada a nota de confiabilidade?",
+            "Cada cláusula do seu contrato é comparada com as de contratos já analisados. A nota é a média de quão "
+            "parecida cada assunto é com o mais parecido que o sistema já viu. Ela só aparece quando há contratos "
+            "suficientes na base.",
+        ),
+        (
+            "O que acontece com o meu arquivo?",
+            "O PDF e o texto extraído são guardados em um armazenamento privado, usado para a análise e para a "
+            "comparação entre contratos. Evite enviar documentos com dados pessoais que você não queira guardar.",
+        ),
+        (
+            "A IA pode errar?",
+            "Pode. Ela usa apenas o texto do documento e as normas de referência do projeto, mas pode interpretar "
+            "algo de forma incompleta. Por isso cada ponto mostra o trecho do contrato, para você conferir.",
+        ),
+    ]
+    return perguntas
 
 
 def pagina_inicio():
@@ -20,19 +68,20 @@ def pagina_enviar_pdf():
 
 def pagina_faq():
     """Página de perguntas frequentes."""
-    pagina = render_template("faq.html")
+    pagina = render_template("faq.html", pagina_atual="faq", perguntas=perguntas_do_faq())
     return pagina
 
 
 def pagina_sobre():
     """Página "Sobre nós"."""
-    pagina = render_template("sobre.html")
+    pagina = render_template("sobre.html", pagina_atual="sobre")
     return pagina
 
 
 def pagina_contato():
     """Página de contato."""
-    pagina = render_template("contato.html")
+    email = (os.getenv("CONTATO_EMAIL") or "").strip()
+    pagina = render_template("contato.html", pagina_atual="contato", email_contato=email)
     return pagina
 
 

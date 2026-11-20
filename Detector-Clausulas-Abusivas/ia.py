@@ -38,7 +38,7 @@ def instrucoes_da_ia():
     A versão fica gravada com cada análise (coluna versao_prompt), para comparar resultados entre versões.
     """
     instrucoes = {
-        "versao": "v1",
+        "versao": "v2",
         "personalidade_da_leitura": (
             "Você é um assistente que explica contratos de financiamento de veículos para pessoas que não são da área "
             "jurídica. Escreva em português do Brasil, com frases curtas e palavras do dia a dia, sem juridiquês. "
@@ -49,6 +49,8 @@ def instrucoes_da_ia():
             "Você classifica trechos de contratos por assunto. Responda sempre e somente com JSON válido."
         ),
         "normas": [
+            "CDC, art. 52, §2º: direito à liquidação antecipada com redução proporcional dos juros e demais acréscimos",
+            "CDC, art. 51, IV e art. 101, I: cláusula que coloca o consumidor em desvantagem exagerada, como foro de eleição distante do domicílio dele",
             "CDC, art. 6º, III: direito à informação clara sobre preço, juros e encargos",
             "CDC, art. 39, I: venda casada (condicionar um produto ou serviço à compra de outro)",
             "CDC, art. 51: cláusulas abusivas",
@@ -77,6 +79,24 @@ def limite_de_caracteres():
     """Quantos caracteres do contrato a IA lê (o que passar disso é cortado, para não estourar o limite do modelo)."""
     limite = 120000
     return limite
+
+
+# ---------------------------------------------------------------------------
+# Privacidade: esconde dados pessoais antes de o texto ir para a IA e para o banco
+# ---------------------------------------------------------------------------
+def anonimizar_texto(texto):
+    """Troca CPF, CNPJ, e-mail e telefone por marcas como [CPF]. Nomes e endereços não são detectados por aqui."""
+    padroes = [
+        (r"(?<!\d)\d{3}\.\d{3}\.\d{3}-\d{2}(?!\d)", "[CPF]"),
+        (r"(?<!\d)\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}(?!\d)", "[CNPJ]"),
+        (r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+", "[E-MAIL]"),
+        (r"(?<!\d)(?:\+?55\s?)?\(?\d{2}\)?\s?9?\d{4}-?\d{4}(?!\d)", "[TELEFONE]"),
+    ]
+
+    for padrao, marca in padroes:
+        texto = re.sub(padrao, marca, texto)
+
+    return texto
 
 
 # ---------------------------------------------------------------------------

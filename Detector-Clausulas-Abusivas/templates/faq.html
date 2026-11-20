@@ -1,11 +1,33 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FAQ</title>
-</head>
-<body>
-<p>Você está em faq.html</p>
-</body>
-</html>
+{% extends "base_info.html" %}
+{% block titulo %}FAQ{% endblock %}
+{% block conteudo %}
+<section class="bn info-faixa" aria-labelledby="faq-titulo" style="--k: #7fd4ff; --tk: #7fd4ff">
+  <i class="bgl"></i>
+  <div class="gr">
+    <div>
+      <span class="eb">Perguntas frequentes</span>
+      <h2 id="faq-titulo">Dúvidas comuns, <span class="b">respostas diretas.</span></h2>
+      <p class="sb">Como o detector funciona, o que ele entrega e o que ele não faz.</p>
+      <div class="ln"></div>
+      <p class="nt">É análise, não veredito jurídico.</p>
+      <a class="info-botao" href="/enviar_pdf">Enviar meu PDF</a>
+    </div>
+    <div class="gp fy env-card">
+      <div class="ph">
+        <span class="ic" style="color: var(--k)">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M9.6 9.5a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.2 1-1.2 1.8M12 17h.01" /></svg>
+        </span>
+        <h3>Perguntas e respostas</h3>
+      </div>
+      <div class="info-faq">
+        {% for pergunta, resposta in perguntas %}
+        <details{% if loop.first %} open{% endif %}>
+          <summary>{{ pergunta }}</summary>
+          <p>{{ resposta }}</p>
+        </details>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

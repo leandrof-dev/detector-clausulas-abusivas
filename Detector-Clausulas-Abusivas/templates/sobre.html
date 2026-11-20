@@ -1,11 +1,58 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sobre nós</title>
-</head>
-<body>
-<p>Você está em sobre.html</p>
-</body>
-</html>
+{% extends "base_info.html" %}
+{% block titulo %}Sobre nós{% endblock %}
+{% block conteudo %}
+<section class="bn info-faixa" aria-labelledby="sobre-titulo" style="--k: #b496ff; --tk: #b496ff">
+  <i class="bgl"></i>
+  <div class="gr">
+    <div>
+      <span class="eb">Sobre nós</span>
+      <h2 id="sobre-titulo">Entender o contrato <span class="b">antes de assinar.</span></h2>
+      <p class="sb">
+        O Detector de Cláusulas Abusivas é um projeto integrador da Fatec Taquaritinga. A ideia é ajudar quem vai
+        financiar um veículo a ler o contrato em linguagem simples.
+      </p>
+      <div class="ln"></div>
+      <p class="nt">Protótipo acadêmico em desenvolvimento.</p>
+    </div>
+    <div class="gp fy env-card">
+      <div class="ph">
+        <span class="ic" style="color: var(--k)">
+          <svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6z" /><path d="M9 12l2.2 2.2L15.5 10" /></svg>
+        </span>
+        <h3>O que fazemos</h3>
+      </div>
+      <ul class="info-lista">
+        <li><b>Lemos o contrato para você.</b> Uma IA explica o documento com frases curtas e aponta o que vale conferir.</li>
+        <li><b>Citamos a norma.</b> Cada ponto de atenção vem com o trecho do contrato e a regra que o sustenta (CDC, resoluções do CMN, súmulas do STJ).</li>
+        <li><b>Comparamos com outros contratos.</b> Uma nota mostra o quanto as cláusulas fogem do que o sistema já viu.</li>
+        <li><b>Não substituímos um advogado.</b> A leitura é assistida e serve para você chegar mais preparado a uma conversa.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="bn info-faixa" aria-labelledby="sobre-como" style="--k: #3ff0a6; --tk: #3ff0a6">
+  <i class="bgl"></i>
+  <div class="gr">
+    <div>
+      <span class="eb">Como funciona</span>
+      <h2 id="sobre-como">Do PDF ao <span class="b">resultado em 4 passos.</span></h2>
+      <div class="ln"></div>
+    </div>
+    <div class="gp fy env-card">
+      <div class="ph">
+        <span class="ic" style="color: var(--k)">
+          <svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2" /></svg>
+        </span>
+        <h3>O caminho do contrato</h3>
+      </div>
+      <ol class="info-passos">
+        <li><b>Envio.</b> Você manda o PDF, com texto selecionável.</li>
+        <li><b>Leitura.</b> O sistema extrai o texto e separa o contrato em cláusulas.</li>
+        <li><b>Análise.</b> A IA resume o contrato, marca o assunto de cada cláusula e destaca os pontos de atenção.</li>
+        <li><b>Comparação.</b> As cláusulas são comparadas com as de contratos já analisados e geram a nota de confiabilidade.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+{% endblock %}

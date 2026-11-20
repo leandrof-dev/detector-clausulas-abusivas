@@ -1,0 +1,50 @@
+<!doctype html>
+<!-- Molde das páginas informativas (FAQ, Sobre nós e Contato): menu, fundo e rodapé iguais aos das outras páginas.
+     Cada página só preenche o título, a página atual do menu e o conteúdo. -->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>{% block titulo %}{% endblock %} · Detector de Cláusulas</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..800&amp;display=swap" />
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <link rel="stylesheet" href="/static/css/enviar-pdf.css" />
+    <link rel="stylesheet" href="/static/css/paginas.css" />
+  </head>
+  <body class="pagina-envio pagina-info">
+    <header class="env-topo">
+      <nav>
+        {% for endereco, nome, chave in [("/", "Início", "index"), ("/enviar_pdf", "Envie seu PDF", "enviar_pdf"), ("/faq", "FAQ", "faq"), ("/sobre", "Sobre nós", "sobre"), ("/contato", "Contato", "contato")] %}
+        <a href="{{ endereco }}"{% if chave == pagina_atual %} class="on" aria-current="page"{% endif %}>{{ nome }}</a>
+        {% endfor %}
+      </nav>
+    </header>
+
+    <main class="env-principal" id="env-principal">
+      {% block conteudo %}{% endblock %}
+    </main>
+
+    <footer class="ftx">
+      <div class="fwrap">
+        <div class="fcol" role="navigation" aria-label="Rodapé">
+          <h5>Navegação</h5>
+          <a href="/">Início</a>
+          <a href="/enviar_pdf">Envie seu PDF</a>
+          <a href="/faq">FAQ</a>
+          <a href="/sobre">Sobre nós</a>
+          <a href="/contato">Contato</a>
+        </div>
+        <div class="fcol">
+          <h5>Projeto</h5>
+          <span>Projeto integrador</span>
+          <span>Fatec Taquaritinga</span>
+          <span>Protótipo em desenvolvimento</span>
+        </div>
+      </div>
+      <div class="fbot">
+        <span>© 2026 Detector de Cláusulas Abusivas em Contrato</span>
+        <span>Protótipo acadêmico · não é aconselhamento jurídico</span>
+      </div>
+    </footer>
+  </body>
+</html>

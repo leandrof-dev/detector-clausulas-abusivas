@@ -11,6 +11,7 @@ from banco import BancoErro, calcular_hash, guardar_analise, guardar_clausulas, 
 from comparacao import comparar_com_a_base, resultado_indisponivel
 from ia import (
     IAErro,
+    anonimizar_texto,
     classificar_clausulas,
     gerar_embeddings,
     instrucoes_da_ia,
@@ -56,6 +57,8 @@ def ler_texto(conteudo_pdf):
 
     if leitura["texto"] == "":
         raise ErroDeEnvio("Este PDF não tem texto selecionável. Ele pode ser digitalizado (precisa de OCR).", 422)
+
+    leitura["texto"] = anonimizar_texto(leitura["texto"])    # CPF, CNPJ, e-mail e telefone não saem do servidor
 
     return leitura
 
