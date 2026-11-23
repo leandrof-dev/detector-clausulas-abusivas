@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <title>Você sabe o que está pagando?</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..800&amp;display=swap" />
-    <link rel="stylesheet" href="/static/css/style.css" />
+    <!-- comum.css = visual geral do site (menu, faixas, cartões, rodapé); inicio.css = só o que é desta página -->
+    <link rel="stylesheet" href="/static/css/comum.css" />
+    <link rel="stylesheet" href="/static/css/inicio.css" />
     <!-- importmap: diz ao navegador onde está o Three.js (biblioteca de 3D) quando um script pede "three" -->
     <script type="importmap">
       {
@@ -15,47 +17,47 @@
   </head>
   <body>
     <!-- barra de progresso da rolagem (topo da janela) -->
-    <div id="prog"></div>
-    <!-- HERO: #track é alto (430vh) para dar rolagem à animação; #hero fica preso na tela enquanto isso (hero.js) -->
-    <div id="track">
-      <section id="hero">
-        <canvas id="cv" aria-hidden="true"></canvas>
+    <div id="progresso"></div>
+    <!-- TOPO: #trilho-topo é alto (430vh) para dar rolagem à animação; #topo fica preso na tela enquanto isso (inicio/topo.js) -->
+    <div id="trilho-topo">
+      <section id="topo">
+        <canvas id="tela-topo" aria-hidden="true"></canvas>
         <nav>
-          <a href="/" class="on">Início</a>
+          <a href="/" class="ativo">Início</a>
           <a href="/enviar_pdf">Envie seu PDF</a>
           <a href="/faq">FAQ</a>
           <a href="/sobre">Sobre nós</a>
           <a href="/contato">Contato</a>
         </nav>
-        <div class="copy">
-          <div class="stg" id="stg">
+        <div class="texto-topo">
+          <div class="etapa" id="etapa">
             <i></i>
-            <span id="stgt">Atenção · contrato caro</span>
+            <span id="etapa-texto">Atenção · contrato caro</span>
           </div>
-          <h1 class="hl" id="hl"></h1>
-          <div class="slg" id="slg"></div>
-          <div class="line"></div>
+          <h1 class="titulo-topo" id="titulo-topo"></h1>
+          <div class="subtitulo-topo" id="subtitulo-topo"></div>
+          <div class="linha-topo"></div>
         </div>
-        <aside id="panel">
-          <div class="hd">
-            <span class="ic">
-              <svg id="ic1" viewBox="0 0 24 24">
+        <aside id="painel">
+          <div class="painel-titulo">
+            <span class="icone">
+              <svg id="icone-alerta" viewBox="0 0 24 24">
                 <path d="M12 3.2L22 20.2H2z" style="fill: currentColor; fill-opacity: 0.14" />
                 <path d="M12 9.2v5.2M12 17.4v.2" />
               </svg>
-              <svg id="ic2" viewBox="0 0 24 24" style="opacity: 0">
+              <svg id="icone-conferido" viewBox="0 0 24 24" style="opacity: 0">
                 <path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z" />
                 <path d="M8.5 12l2.5 2.5 4.5-5" />
               </svg>
             </span>
             Análise do seu contrato
           </div>
-          <div class="cap" id="cap"></div>
-          <div id="rows"></div>
-          <div class="bar"><i id="bar"></i></div>
+          <div class="painel-legenda" id="painel-legenda"></div>
+          <div id="painel-linhas"></div>
+          <div class="painel-barra"><i id="painel-barra-cheia"></i></div>
         </aside>
         <svg
-          id="hint"
+          id="seta-rolar"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -67,23 +69,23 @@
         </svg>
       </section>
     </div>
-    <!-- PÁGINA: cada .bn é uma seção; --k é a cor de destaque dela -->
-    <main id="pg">
-      <!-- 1 · O problema: iceberg (iceberg.js + faixas em secoes.js) -->
-      <section class="bn" style="--k: #ff5566">
-        <div class="gr">
+    <!-- PÁGINA: cada .faixa é uma seção; --cor é a cor de destaque dela -->
+    <main id="pagina">
+      <!-- 1 · O problema: iceberg 3D (inicio/iceberg.js) + camadas que aparecem ao rolar (inicio/secoes.js) -->
+      <section class="faixa" style="--cor: #ff5566">
+        <div class="grade">
           <div>
-            <span class="eb rv">O problema</span>
-            <h2 class="rv">A parcela é só a <span class="b">ponta do contrato.</span></h2>
-            <p class="sb rv">
+            <span class="etiqueta revelar">O problema</span>
+            <h2 class="revelar">A parcela é só a <span class="destaque">ponta do contrato.</span></h2>
+            <p class="subtitulo revelar">
               Documentos longos e técnicos, assinados em poucos minutos: a escolha acaba apoiada num número só.
             </p>
-            <div class="ln rv"></div>
+            <div class="traco revelar"></div>
           </div>
-          <div class="rv">
-            <div class="gp fy">
-              <div class="ph">
-                <span class="ic" style="color: var(--k)">
+          <div class="revelar">
+            <div class="cartao flutua">
+              <div class="cartao-titulo">
+                <span class="icone" style="color: var(--cor)">
                   <svg viewBox="0 0 24 24">
                     <path d="M12 3.2L22 20.2H2z" style="fill: currentColor; fill-opacity: 0.14" />
                     <path d="M12 9.2v5.2M12 17.4v.2" />
@@ -91,18 +93,18 @@
                 </span>
                 O que está sob a parcela
               </div>
-              <div class="ice" id="ice">
-                <canvas id="icv"></canvas>
-                <div class="bd" style="top: 0; height: 30.8%; --r: 143, 208, 255">
+              <div class="iceberg" id="iceberg">
+                <canvas id="tela-iceberg"></canvas>
+                <div class="camada" style="top: 0; height: 30.8%; --cor-camada: 143, 208, 255">
                   <span><b>Parcela e preço</b> <small>o que a gente vê como principal</small></span>
                 </div>
-                <div class="bd w" style="top: 30.8%; height: 21%; --r: 255, 154, 164">
+                <div class="camada linha-dagua" style="top: 30.8%; height: 21%; --cor-camada: 255, 154, 164">
                   <span><b>Encargos</b> <small>oculto</small></span>
                 </div>
-                <div class="bd" style="top: 51.8%; height: 21%; --r: 255, 85, 102">
+                <div class="camada" style="top: 51.8%; height: 21%; --cor-camada: 255, 85, 102">
                   <span><b>Tarifas embutidas</b> <small>oculto</small></span>
                 </div>
-                <div class="bd" style="top: 72.8%; height: 27.2%; --r: 185, 64, 106">
+                <div class="camada" style="top: 72.8%; height: 27.2%; --cor-camada: 185, 64, 106">
                   <span><b>Serviços agregados e outros</b> <small>oculto</small></span>
                 </div>
               </div>
@@ -111,26 +113,26 @@
         </div>
       </section>
 
-      <!-- 2 · Caso real: leitura guiada de um contrato (secoes.js) -->
-      <section class="bn" style="--k: #ff6b7d">
-        <div class="gr">
+      <!-- 2 · Caso real: leitura guiada de um contrato (inicio/secoes.js) -->
+      <section class="faixa" style="--cor: #ff6b7d">
+        <div class="grade">
           <div>
-            <span class="eb rv">Leitura guiada · caso real</span>
-            <h2 class="rv">Um contrato de verdade, <span class="b">lido ponto a ponto.</span></h2>
-            <p class="sb rv">
+            <span class="etiqueta revelar">Leitura guiada · caso real</span>
+            <h2 class="revelar">Um contrato de verdade, <span class="destaque">lido ponto a ponto.</span></h2>
+            <p class="subtitulo revelar">
               Trechos de um contrato público de financiamento de veículo que passou por perícia judicial. Passe o mouse
               ou toque em cada ponto.
             </p>
-            <div class="ln rv"></div>
-            <p class="nt rv">
+            <div class="traco revelar"></div>
+            <p class="observacao revelar">
               Baseado em laudo pericial público de revisão contratual (Banco Volkswagen S/A, contrato de 2017). Dados
               pessoais removidos. Não é análise jurídica.
             </p>
           </div>
-          <div class="rv">
-            <div class="gp" data-tilt="soft">
-              <div class="ph">
-                <span class="ic" style="color: var(--k)">
+          <div class="revelar">
+            <div class="cartao" data-inclinacao="suave">
+              <div class="cartao-titulo">
+                <span class="icone" style="color: var(--cor)">
                   <svg viewBox="0 0 24 24">
                     <path d="M7 3h7l5 5v13H7z" />
                     <path d="M14 3v5h5M10 13h6M10 17h4" />
@@ -138,72 +140,72 @@
                 </span>
                 Cédula de Crédito Bancário · veículo usado
               </div>
-              <div class="dsum">
+              <div class="resumo-contrato">
                 <div><small>Valor do bem</small> <b>R$ 30.900</b></div>
                 <div><small>Entrada</small> <b>R$ 17.000</b></div>
                 <div><small>Total financiado</small> <b>R$ 14.927</b></div>
                 <div><small>Parcelas</small> <b>48 × R$ 491,60</b></div>
               </div>
-              <div class="dcl" id="ppr">
-                <button class="cl" type="button">
-                  <i class="dt"></i>
-                  <span><em>Taxa de juros</em>2,05% ao mês · 27,57% ao ano</span>
-                  <s></s>
+              <div class="pontos-contrato" id="pontos-contrato">
+                <button class="ponto" type="button">
+                  <i class="ponto-cor"></i>
+                  <span class="ponto-texto"><em>Taxa de juros</em>2,05% ao mês · 27,57% ao ano</span>
+                  <span class="ponto-selo"></span>
                 </button>
-                <button class="cl" type="button">
-                  <i class="dt"></i>
-                  <span><em>Tarifa de cadastro</em>R$ 495,00</span>
-                  <s></s>
+                <button class="ponto" type="button">
+                  <i class="ponto-cor"></i>
+                  <span class="ponto-texto"><em>Tarifa de cadastro</em>R$ 495,00</span>
+                  <span class="ponto-selo"></span>
                 </button>
-                <button class="cl" type="button">
-                  <i class="dt"></i>
-                  <span><em>IOF financiado</em>R$ 471,72 somado ao valor financiado</span>
-                  <s></s>
+                <button class="ponto" type="button">
+                  <i class="ponto-cor"></i>
+                  <span class="ponto-texto"><em>IOF financiado</em>R$ 471,72 somado ao valor financiado</span>
+                  <span class="ponto-selo"></span>
                 </button>
-                <button class="cl" type="button">
-                  <i class="dt"></i>
-                  <span><em>Parcelas fixas</em>sistema de amortização não nomeado</span>
-                  <s></s>
+                <button class="ponto" type="button">
+                  <i class="ponto-cor"></i>
+                  <span class="ponto-texto"><em>Parcelas fixas</em>sistema de amortização não nomeado</span>
+                  <span class="ponto-selo"></span>
                 </button>
-                <button class="cl" type="button">
-                  <i class="dt"></i>
-                  <span><em>Encargos de atraso</em>comissão de permanência + multa + juros de mora</span>
-                  <s></s>
+                <button class="ponto" type="button">
+                  <i class="ponto-cor"></i>
+                  <span class="ponto-texto"><em>Encargos de atraso</em>comissão de permanência + multa + juros de mora</span>
+                  <span class="ponto-selo"></span>
                 </button>
               </div>
-              <div class="xpl" id="xpl" aria-live="polite"></div>
+              <div class="explicacao" id="explicacao" aria-live="polite"></div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- 3 · O que vamos conferir: apontamentos com a norma (secoes.js) -->
-      <section class="bn" style="--k: #8d9bff">
-        <div class="gr">
+      <!-- 3 · O que vamos conferir: apontamentos com a norma (inicio/secoes.js) -->
+      <section class="faixa" style="--cor: #8d9bff">
+        <div class="grade">
           <div>
-            <span class="eb rv">O que vamos conferir</span>
-            <h2 class="rv">Cada apontamento, <span class="b">amarrado na norma.</span></h2>
-            <p class="sb rv">
+            <span class="etiqueta revelar">O que vamos conferir</span>
+            <h2 class="revelar">Cada apontamento, <span class="destaque">amarrado na norma.</span></h2>
+            <p class="subtitulo revelar">
               Juros, tarifas, seguro, multa, cancelamento e Custo Efetivo Total, cada um com a norma que o sustenta.
             </p>
-            <div class="ln rv"></div>
+            <div class="traco revelar"></div>
           </div>
-          <div class="rv">
-            <div class="gp fy ap" id="ap">
-              <div class="ph">
-                <span class="ic" style="color: var(--k)">
+          <div class="revelar">
+            <div class="cartao flutua apontamentos" id="apontamentos">
+              <div class="cartao-titulo">
+                <span class="icone" style="color: var(--cor)">
                   <svg viewBox="0 0 24 24">
                     <circle cx="11" cy="11" r="6.5" />
                     <path d="M20 20l-4.2-4.2" />
                   </svg>
                 </span>
                 Pontos a conferir
-                <span class="apc" id="apc">analisando…</span>
+                <span class="contador" id="contador">analisando…</span>
               </div>
-              <div class="apl">
-                <i class="bar3"></i>
-                <div class="rw">
-                  <i class="ai">
+              <div class="lista-apontamentos">
+                <i class="marcador-lateral"></i>
+                <div class="linha">
+                  <i class="icone-assunto">
                     <svg viewBox="0 0 24 24">
                       <path d="M19 5L5 19" />
                       <circle cx="6.5" cy="6.5" r="2.5" />
@@ -211,8 +213,8 @@
                     </svg>
                   </i>
                   <span>Juros<small>taxa clara, ao mês e ao ano</small></span>
-                  <i class="chip">CDC, art. 6º, III · CMN 3.517/2007</i>
-                  <div class="dd">
+                  <i class="selo">CDC, art. 6º, III · CMN 3.517/2007</i>
+                  <div class="detalhe">
                     <div>
                       <p>
                         A taxa precisa aparecer ao mês e ao ano. A gente compara com a média do Banco Central do mesmo
@@ -221,16 +223,16 @@
                     </div>
                   </div>
                 </div>
-                <div class="rw">
-                  <i class="ai">
+                <div class="linha">
+                  <i class="icone-assunto">
                     <svg viewBox="0 0 24 24">
                       <path d="M6 3h12v18l-3-2-3 2-3-2-3 2z" />
                       <path d="M9 8h6M9 12h6" />
                     </svg>
                   </i>
                   <span>Tarifas<small>cada valor informado</small></span>
-                  <i class="chip">CDC, art. 6º, III</i>
-                  <div class="dd">
+                  <i class="selo">CDC, art. 6º, III</i>
+                  <div class="detalhe">
                     <div>
                       <p>
                         Cada tarifa tem que estar escrita com o valor. Tarifa de cadastro, por exemplo, só no início do
@@ -239,51 +241,51 @@
                     </div>
                   </div>
                 </div>
-                <div class="rw">
-                  <i class="ai">
+                <div class="linha">
+                  <i class="icone-assunto">
                     <svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z" /></svg>
                   </i>
                   <span>Seguro<small>opcional ou venda casada</small></span>
-                  <i class="chip">CDC, art. 39, I</i>
-                  <div class="dd">
+                  <i class="selo">CDC, art. 39, I</i>
+                  <div class="detalhe">
                     <div><p>Seguro pode ser oferecido, mas não imposto, e nunca com seguradora obrigatória.</p></div>
                   </div>
                 </div>
-                <div class="rw">
-                  <i class="ai">
+                <div class="linha">
+                  <i class="icone-assunto">
                     <svg viewBox="0 0 24 24">
                       <circle cx="12" cy="12" r="8" />
                       <path d="M12 8v4l3 2" />
                     </svg>
                   </i>
                   <span>Multa<small>quando e quanto é cobrada</small></span>
-                  <i class="chip">CDC, art. 6º, III</i>
-                  <div class="dd">
+                  <i class="selo">CDC, art. 6º, III</i>
+                  <div class="detalhe">
                     <div>
                       <p>Atraso: multa de até 2% e juros de mora. Comissão de permanência não se soma a eles.</p>
                     </div>
                   </div>
                 </div>
-                <div class="rw">
-                  <i class="ai">
+                <div class="linha">
+                  <i class="icone-assunto">
                     <svg viewBox="0 0 24 24">
                       <path d="M10 4H5v16h5" />
                       <path d="M14 8l4 4-4 4M18 12H9" />
                     </svg>
                   </i>
                   <span>Cancelamento e renovação<small>saída, prazos e custos</small></span>
-                  <i class="chip">CDC, art. 51 · art. 6º, III</i>
-                  <div class="dd">
+                  <i class="selo">CDC, art. 51 · art. 6º, III</i>
+                  <div class="detalhe">
                     <div><p>Quitar antes do prazo dá direito a desconto proporcional dos juros.</p></div>
                   </div>
                 </div>
-                <div class="rw">
-                  <i class="ai">
+                <div class="linha">
+                  <i class="icone-assunto">
                     <svg viewBox="0 0 24 24"><path d="M17 5H7l6 7-6 7h10" /></svg>
                   </i>
                   <span>Custo Efetivo Total<small>deve ser informado</small></span>
-                  <i class="chip">CMN 3.517/2007</i>
-                  <div class="dd">
+                  <i class="selo">CMN 3.517/2007</i>
+                  <div class="detalhe">
                     <div>
                       <p>
                         O CET junta juros, tarifas, seguro e impostos numa taxa só. É o número para comparar propostas.
@@ -297,69 +299,69 @@
         </div>
       </section>
 
-      <!-- 4 · Nota de confiabilidade: montanha 3D (montanha.js) + controle (secoes.js) -->
-      <section class="bn" id="nb" style="--c: #b496ff; --k: var(--c)">
-        <div class="gr">
+      <!-- 4 · Nota de confiabilidade: montanha 3D (inicio/montanha.js) + controle (inicio/secoes.js) -->
+      <section class="faixa" id="nota" style="--cor-nota: #b496ff; --cor: var(--cor-nota)">
+        <div class="grade">
           <div>
-            <span class="eb rv">Nota de confiabilidade</span>
-            <h2 class="rv">Quanto o contrato <span class="b">foge da curva?</span></h2>
-            <p class="sb rv">
+            <span class="etiqueta revelar">Nota de confiabilidade</span>
+            <h2 class="revelar">Quanto o contrato <span class="destaque">foge da curva?</span></h2>
+            <p class="subtitulo revelar">
               O sistema compara o contrato com referências da mesma categoria. Quanto mais fora da curva, menor a
               confiabilidade da análise.
             </p>
-            <div class="ln rv"></div>
-            <p class="nt rv">
+            <div class="traco revelar"></div>
+            <p class="observacao revelar">
               É análise, não veredito jurídico. Role a página ou arraste o controle para afastar o contrato da curva:
               simulação ilustrativa.
             </p>
           </div>
-          <div class="rv">
-            <div class="gp fy mtn" id="mt">
-              <div class="mv">
-                <canvas id="mcv" aria-hidden="true"></canvas>
-                <div class="pdf" aria-hidden="true">
-                  <div class="tg">
+          <div class="revelar">
+            <div class="cartao flutua cartao-montanha" id="cartao-montanha">
+              <div class="montanha-quadro">
+                <canvas id="tela-montanha" aria-hidden="true"></canvas>
+                <div class="folha-pdf" aria-hidden="true">
+                  <div class="folha-etiqueta">
                     <i>PDF</i>
                     Exemplo ilustrativo
                   </div>
                   <h4>Contrato × referências</h4>
-                  <div class="lg">
-                    <s>Contrato</s>
-                    <s>Referência</s>
+                  <div class="folha-legenda">
+                    <span>Contrato</span>
+                    <span>Referência</span>
                   </div>
-                  <div class="m">
+                  <div class="medida">
                     <b>Taxa ao mês</b>
-                    <small id="p1"></small>
-                    <div class="t c"><i id="b1"></i></div>
-                    <div class="t"><i style="width: 68%"></i></div>
+                    <small id="valor-taxa"></small>
+                    <div class="barra do-contrato"><i id="barra-taxa"></i></div>
+                    <div class="barra"><i style="width: 68%"></i></div>
                   </div>
-                  <div class="m">
+                  <div class="medida">
                     <b>Custo efetivo total</b>
-                    <small id="p2"></small>
-                    <div class="t c"><i id="b2"></i></div>
-                    <div class="t"><i style="width: 64%"></i></div>
+                    <small id="valor-cet"></small>
+                    <div class="barra do-contrato"><i id="barra-cet"></i></div>
+                    <div class="barra"><i style="width: 64%"></i></div>
                   </div>
-                  <div class="m">
+                  <div class="medida">
                     <b>Encargos adicionais</b>
-                    <small id="p3"></small>
-                    <div class="t c"><i id="b3"></i></div>
-                    <div class="t"><i style="width: 48%"></i></div>
+                    <small id="valor-encargos"></small>
+                    <div class="barra do-contrato"><i id="barra-encargos"></i></div>
+                    <div class="barra"><i style="width: 48%"></i></div>
                   </div>
-                  <div class="cf">
+                  <div class="folha-confiabilidade">
                     <span>Confiabilidade</span>
-                    <em id="pc"></em>
+                    <em id="folha-nota"></em>
                   </div>
-                  <div class="ft2">Simulação ilustrativa · não é análise jurídica</div>
+                  <div class="folha-rodape">Simulação ilustrativa · não é análise jurídica</div>
                 </div>
               </div>
-              <div class="sc">
-                <span id="st"></span>
-                <b id="sc"></b>
+              <div class="placar">
+                <span id="placar-situacao"></span>
+                <b id="placar-nota"></b>
               </div>
-              <div class="bar2"><i id="fl"></i></div>
+              <div class="barra-nota"><i id="barra-nota-cheia"></i></div>
               <div
-                class="rt"
-                id="rt"
+                class="controle"
+                id="controle"
                 role="slider"
                 tabindex="0"
                 aria-label="Distância da curva de referência"
@@ -369,11 +371,11 @@
               >
                 <i></i>
               </div>
-              <div class="rl">
+              <div class="controle-legenda">
                 <span>Perto da curva</span>
                 <span>Longe da curva</span>
               </div>
-              <span class="mh" id="mh">
+              <span class="dica-rolar" id="dica-rolar">
                 <svg viewBox="0 0 14 22">
                   <rect x="1" y="1" width="12" height="20" rx="6" />
                   <circle cx="7" cy="6.5" r="1.6" fill="currentColor" stroke="none" />
@@ -385,35 +387,35 @@
         </div>
       </section>
 
-      <!-- 5 · Antes × depois: carro 3D (carro-comparacao.js) + divisória (secoes.js) -->
-      <section class="bn" style="--k: #7fd4ff">
-        <div class="gr">
+      <!-- 5 · Antes × depois: carro 3D (inicio/carro-comparacao.js) + divisória (inicio/secoes.js) -->
+      <section class="faixa" style="--cor: #7fd4ff">
+        <div class="grade">
           <div>
-            <span class="eb rv">Antes × depois</span>
-            <h2 class="rv">O mesmo carro, <span class="b">dois contratos.</span></h2>
-            <p class="sb rv">
+            <span class="etiqueta revelar">Antes × depois</span>
+            <h2 class="revelar">O mesmo carro, <span class="destaque">dois contratos.</span></h2>
+            <p class="subtitulo revelar">
               Arraste a divisória para comparar o contrato original com a versão ajustada às referências.
             </p>
-            <div class="ln rv"></div>
-            <p class="nt rv">
+            <div class="traco revelar"></div>
+            <p class="observacao revelar">
               Audi RS6 Avant 2026 pelo valor da tabela FIPE (outubro/2026): entrada de 40% e R$ 719.000 financiados em
               48 parcelas. Taxas e encargos são ilustrativos.
             </p>
           </div>
-          <div class="rv">
-            <div class="gp" data-tilt="soft">
-              <div class="ph">Original × ajustado</div>
-              <div class="carw">
-                <div class="cpt">
+          <div class="revelar">
+            <div class="cartao" data-inclinacao="suave">
+              <div class="cartao-titulo">Original × ajustado</div>
+              <div class="carro">
+                <div class="carro-preco">
                   <span>Audi RS6 Avant 2026 · tabela FIPE out/2026</span>
                   <b>R$ 1.198.549</b>
                   <small>entrada de R$ 479.549 · R$ 719.000 financiados em 48 parcelas</small>
                 </div>
-                <div class="cvw">
-                  <canvas class="car3" aria-hidden="true"></canvas>
+                <div class="carro-visor">
+                  <canvas class="tela-carro-3d" aria-hidden="true"></canvas>
                   <button
                     type="button"
-                    class="fsb"
+                    class="botao-tela-cheia"
                     aria-label="Abrir o modelo 3D em tela cheia"
                     title="Abrir em tela cheia"
                   >
@@ -424,54 +426,54 @@
                   </button>
                 </div>
               </div>
-              <div class="cmp" id="cmp">
-                <div class="ly a">
-                  <span class="lb">Original</span>
-                  <div class="rw">
+              <div class="comparador" id="comparador">
+                <div class="lado original">
+                  <span class="lado-rotulo">Original</span>
+                  <div class="linha">
                     <span>Taxa</span>
                     <b>2,8% a.m.</b>
                   </div>
-                  <div class="rw">
+                  <div class="linha">
                     <span>Encargos</span>
                     <b>R$ 59.700</b>
                   </div>
-                  <div class="rw">
+                  <div class="linha">
                     <span>CET</span>
                     <b>3,4% a.m.</b>
                   </div>
-                  <div class="rw">
+                  <div class="linha">
                     <span>Parcela</span>
-                    <b data-f="p"></b>
+                    <b data-campo="parcela"></b>
                   </div>
-                  <div class="rw">
+                  <div class="linha">
                     <span>Total pago</span>
-                    <b data-f="t"></b>
+                    <b data-campo="total"></b>
                   </div>
                 </div>
-                <div class="ly b" aria-hidden="true">
-                  <span class="lb">Ajustado</span>
-                  <div class="rw">
+                <div class="lado ajustado" aria-hidden="true">
+                  <span class="lado-rotulo">Ajustado</span>
+                  <div class="linha">
                     <span>Taxa</span>
                     <b>2,4% a.m.</b>
                   </div>
-                  <div class="rw">
+                  <div class="linha">
                     <span>Encargos</span>
                     <b>R$ 36.400</b>
                   </div>
-                  <div class="rw">
+                  <div class="linha">
                     <span>CET</span>
                     <b>2,9% a.m.</b>
                   </div>
-                  <div class="rw">
+                  <div class="linha">
                     <span>Parcela</span>
-                    <b data-f="p"></b>
+                    <b data-campo="parcela"></b>
                   </div>
-                  <div class="rw">
+                  <div class="linha">
                     <span>Total pago</span>
-                    <b data-f="t"></b>
+                    <b data-campo="total"></b>
                   </div>
                 </div>
-                <i class="dv"></i>
+                <i class="divisoria"></i>
                 <input
                   type="range"
                   min="0"
@@ -480,33 +482,33 @@
                   aria-label="Divisória entre contrato original e ajustado"
                 />
               </div>
-              <div class="eco">Diferença no total pago<b id="cdf"></b></div>
+              <div class="economia">Diferença no total pago<b id="economia-valor"></b></div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- 6 · Teste rápido: quiz (secoes.js) -->
-      <section class="bn" style="--k: #b496ff">
-        <div class="gr">
+      <!-- 6 · Teste rápido: quiz (inicio/secoes.js) -->
+      <section class="faixa" style="--cor: #b496ff">
+        <div class="grade">
           <div>
-            <span class="eb rv">Teste rápido</span>
-            <h2 class="rv">Você <span class="b">assinaria?</span></h2>
-            <p class="sb rv">Três cláusulas que aparecem em contratos de financiamento. Qual parece abusiva?</p>
-            <div class="ln rv"></div>
-            <p class="nt rv">As respostas valem como regra geral. Cada caso depende do contrato inteiro.</p>
+            <span class="etiqueta revelar">Teste rápido</span>
+            <h2 class="revelar">Você <span class="destaque">assinaria?</span></h2>
+            <p class="subtitulo revelar">Três cláusulas que aparecem em contratos de financiamento. Qual parece abusiva?</p>
+            <div class="traco revelar"></div>
+            <p class="observacao revelar">As respostas valem como regra geral. Cada caso depende do contrato inteiro.</p>
           </div>
-          <div class="rv">
-            <div class="gp" data-tilt="soft" id="quiz">
-              <div class="ph">Abusiva ou não?</div>
-              <div class="qz">
-                <div class="qi" data-a="abusiva">
+          <div class="revelar">
+            <div class="cartao" data-inclinacao="suave" id="quiz">
+              <div class="cartao-titulo">Abusiva ou não?</div>
+              <div class="perguntas">
+                <div class="pergunta" data-resposta="abusiva">
                   <p>“Multa de 10% sobre a parcela em atraso.”</p>
-                  <div class="qb">
-                    <button type="button" data-a="abusiva">Parece abusiva</button>
-                    <button type="button" data-a="ok">Parece ok</button>
+                  <div class="opcoes">
+                    <button type="button" data-resposta="abusiva">Parece abusiva</button>
+                    <button type="button" data-resposta="ok">Parece ok</button>
                   </div>
-                  <div class="qa">
+                  <div class="resposta">
                     <div>
                       <p>
                         <em></em> Em contratos de crédito ao consumidor, a multa por atraso é limitada a 2% da prestação
@@ -515,13 +517,13 @@
                     </div>
                   </div>
                 </div>
-                <div class="qi" data-a="ok">
+                <div class="pergunta" data-resposta="ok">
                   <p>“IOF incluído no valor financiado, pago junto com as parcelas.”</p>
-                  <div class="qb">
-                    <button type="button" data-a="abusiva">Parece abusiva</button>
-                    <button type="button" data-a="ok">Parece ok</button>
+                  <div class="opcoes">
+                    <button type="button" data-resposta="abusiva">Parece abusiva</button>
+                    <button type="button" data-resposta="ok">Parece ok</button>
                   </div>
-                  <div class="qa">
+                  <div class="resposta">
                     <div>
                       <p>
                         <em></em> O STJ admite financiar o IOF junto com o crédito (Tema 621). Ele só precisa estar
@@ -530,13 +532,13 @@
                     </div>
                   </div>
                 </div>
-                <div class="qi" data-a="abusiva">
+                <div class="pergunta" data-resposta="abusiva">
                   <p>“Comissão de permanência cobrada junto com juros de mora e multa.”</p>
-                  <div class="qb">
-                    <button type="button" data-a="abusiva">Parece abusiva</button>
-                    <button type="button" data-a="ok">Parece ok</button>
+                  <div class="opcoes">
+                    <button type="button" data-resposta="abusiva">Parece abusiva</button>
+                    <button type="button" data-resposta="ok">Parece ok</button>
                   </div>
-                  <div class="qa">
+                  <div class="resposta">
                     <div>
                       <p>
                         <em></em> O STJ não permite somar a comissão de permanência a outros encargos de atraso (Súmula
@@ -546,9 +548,9 @@
                   </div>
                 </div>
               </div>
-              <div class="qf">
-                <span class="qs" aria-live="polite"></span>
-                <button type="button" class="qr" hidden="">Refazer</button>
+              <div class="quiz-rodape">
+                <span class="quiz-placar" aria-live="polite"></span>
+                <button type="button" class="refazer" hidden="">Refazer</button>
               </div>
             </div>
           </div>
@@ -556,72 +558,73 @@
       </section>
 
       <!-- 7 · Privacidade -->
-      <section class="bn" style="--k: #3ff0a6">
-        <div class="gr">
+      <section class="faixa" style="--cor: #3ff0a6">
+        <div class="grade">
           <div>
-            <span class="eb rv">Privacidade</span>
-            <h2 class="rv">Sua identidade <span class="b">fica de fora.</span></h2>
-            <p class="sb rv">
-              Contratos públicos e os recebidos terão a identidade borrada. O sistema só vasculha informações úteis ao
-              cliente.
+            <span class="etiqueta revelar">Privacidade</span>
+            <h2 class="revelar">Seus documentos <span class="destaque">ficam de fora.</span></h2>
+            <p class="subtitulo revelar">
+              Antes de o contrato ir para a IA e para o banco de dados, o sistema esconde CPF, CNPJ, e-mail e
+              telefone. A análise usa só as condições do contrato.
             </p>
-            <div class="ln rv"></div>
-            <p class="nt rv">
-              Seus dados pessoais e suas pendências não entram na análise: só as condições do contrato.
+            <div class="traco revelar"></div>
+            <p class="observacao revelar">
+              Nomes e endereços ainda não são escondidos e o PDF original fica guardado em uma área privada:
+              prefira enviar contratos sem dados pessoais.
             </p>
           </div>
-          <div class="rv">
-            <div class="gp fy pv">
-              <div class="ph">
-                <span class="ic" style="color: var(--k)">
+          <div class="revelar">
+            <div class="cartao flutua privacidade">
+              <div class="cartao-titulo">
+                <span class="icone" style="color: var(--cor)">
                   <svg viewBox="0 0 24 24">
                     <rect x="5" y="11" width="14" height="9" rx="2" />
                     <path d="M8 11V8a4 4 0 0 1 8 0v3" />
                   </svg>
                 </span>
-                Contrato anonimizado
+                Dados escondidos antes da análise
               </div>
-              <div class="pvu">
-                <div class="av">
-                  <i class="rg"></i>
-                  <i class="rg r2"></i>
+              <div class="pessoa">
+                <div class="avatar">
+                  <i class="onda"></i>
+                  <i class="onda onda-atrasada"></i>
                   <svg viewBox="0 0 48 48">
                     <circle cx="24" cy="18" r="8" />
                     <path d="M9 40c2-8 8-12 15-12s13 4 15 12" />
                   </svg>
-                  <span class="lk">
+                  <span class="cadeado">
                     <svg viewBox="0 0 24 24">
                       <rect x="5" y="11" width="14" height="9" rx="2" />
                       <path d="M8 11V8a4 4 0 0 1 8 0v3" />
                     </svg>
                   </span>
                 </div>
-                <div><b>Você</b> <small>Nome, documento, endereço e situação financeira ficam protegidos.</small></div>
+                <div><b>Você</b> <small>CPF, CNPJ, e-mail e telefone viram marcas como [CPF] antes da leitura da IA.</small></div>
               </div>
               <div>
-                <div class="rw" style="--j: 0">
-                  <span>Nome</span>
-                  <span class="rx"><em>Maria A. Oliveira</em><i></i></span>
-                </div>
-                <div class="rw" style="--j: 1">
+                <div class="linha" style="--ordem-linha: 0">
                   <span>CPF</span>
-                  <span class="rx"><em>123.456.789-00</em><i></i></span>
+                  <span class="dado-pessoal"><em>123.456.789-00</em><i></i></span>
                 </div>
-                <div class="rw" style="--j: 2">
-                  <span>Endereço</span>
-                  <span class="rx"><em>Rua das Flores, 100</em><i></i></span>
+                <div class="linha" style="--ordem-linha: 1">
+                  <span>CNPJ</span>
+                  <span class="dado-pessoal"><em>12.345.678/0001-90</em><i></i></span>
                 </div>
-                <div class="rw" style="--j: 3">
-                  <span>Pendências no seu nome</span>
-                  <span class="rx"><em>2 registros</em><i></i></span>
+                <div class="linha" style="--ordem-linha: 2">
+                  <span>E-mail</span>
+                  <span class="dado-pessoal"><em>maria@exemplo.com</em><i></i></span>
                 </div>
-                <div class="rw ck" style="--j: 4">
+                <div class="linha" style="--ordem-linha: 3">
+                  <span>Telefone</span>
+                  <span class="dado-pessoal"><em>(16) 99999-0000</em><i></i></span>
+                </div>
+                <div class="linha conferido" style="--ordem-linha: 4">
                   <span>Juros e tarifas</span>
-                  <b class="ok">analisado</b>
+                  <b class="analisado">analisado</b>
                 </div>
-                <div class="rw ck" style="--j: 5">
+                <div class="linha conferido" style="--ordem-linha: 5">
                   <span>Prazo e condições</span>
-                  <b class="ok">analisado</b>
+                  <b class="analisado">analisado</b>
                 </div>
               </div>
             </div>
@@ -630,45 +633,45 @@
       </section>
 
       <!-- 8 · Como funciona -->
-      <section class="bn" style="--k: #4fd8c0">
-        <div class="gr">
+      <section class="faixa" style="--cor: #4fd8c0">
+        <div class="grade">
           <div>
-            <span class="eb rv">Como funciona</span>
-            <h2 class="rv">Cinco passos do <span class="b">PDF ao entendimento.</span></h2>
-            <p class="sb rv">Do envio do contrato à nota de confiabilidade: todas as etapas já rodam no protótipo.</p>
-            <div class="ln rv"></div>
+            <span class="etiqueta revelar">Como funciona</span>
+            <h2 class="revelar">Cinco passos do <span class="destaque">PDF ao entendimento.</span></h2>
+            <p class="subtitulo revelar">Do envio do contrato à nota de confiabilidade: todas as etapas já rodam no protótipo.</p>
+            <div class="traco revelar"></div>
           </div>
-          <div class="rv">
-            <div class="gp fy">
-              <div class="ph">Como funciona</div>
-              <div class="sp">
-                <div class="sr">
-                  <i class="nm" style="background: #ff5566">1</i>
+          <div class="revelar">
+            <div class="cartao flutua">
+              <div class="cartao-titulo">Como funciona</div>
+              <div class="passos">
+                <div class="passo">
+                  <i class="numero" style="background: #ff5566">1</i>
                   <div><b>Envie o contrato</b> <small>Um PDF do contrato de financiamento de veículo.</small></div>
                 </div>
-                <div class="sr">
-                  <i class="nm" style="background: #b496ff">2</i>
+                <div class="passo">
+                  <i class="numero" style="background: #b496ff">2</i>
                   <div>
                     <b>Leitura do texto</b>
                     <small>O sistema lê o documento e separa o texto em cláusulas.</small>
                   </div>
                 </div>
-                <div class="sr">
-                  <i class="nm" style="background: #b496ff">3</i>
+                <div class="passo">
+                  <i class="numero" style="background: #b496ff">3</i>
                   <div>
                     <b>Explicação clara</b>
                     <small>Uma IA explica o contrato em linguagem comum, de forma literal.</small>
                   </div>
                 </div>
-                <div class="sr">
-                  <i class="nm" style="background: #b496ff">4</i>
+                <div class="passo">
+                  <i class="numero" style="background: #b496ff">4</i>
                   <div>
                     <b>Pontos a conferir</b>
                     <small>Cada ponto vem com o trecho do contrato e a norma que o sustenta.</small>
                   </div>
                 </div>
-                <div class="sr">
-                  <i class="nm" style="background: #3ff0a6">5</i>
+                <div class="passo">
+                  <i class="numero" style="background: #3ff0a6">5</i>
                   <div>
                     <b>Comparação</b>
                     <small
@@ -684,33 +687,33 @@
       </section>
 
       <!-- 9 · Onde estamos -->
-      <section class="bn" style="--k: #4fe8b0">
-        <div class="gr">
+      <section class="faixa" style="--cor: #4fe8b0">
+        <div class="grade">
           <div>
-            <span class="eb rv">Onde estamos</span>
-            <h2 class="rv">O protótipo já <span class="b">funciona de ponta a ponta.</span></h2>
-            <p class="sb rv">
+            <span class="etiqueta revelar">Onde estamos</span>
+            <h2 class="revelar">O protótipo já <span class="destaque">funciona de ponta a ponta.</span></h2>
+            <p class="subtitulo revelar">
               Já dá para enviar um contrato e receber a leitura da IA, os pontos a conferir e a nota. A linha do tempo
               mostra o que falta.
             </p>
-            <div class="ln rv"></div>
+            <div class="traco revelar"></div>
           </div>
-          <div class="rv">
-            <div class="gp fy">
-              <div class="ph">Linha do tempo</div>
-              <div class="sp">
-                <div class="sr">
-                  <i class="nm" style="background: #3ff0a6">✓</i>
+          <div class="revelar">
+            <div class="cartao flutua">
+              <div class="cartao-titulo">Linha do tempo</div>
+              <div class="passos">
+                <div class="passo">
+                  <i class="numero" style="background: #3ff0a6">✓</i>
                   <div>
                     <b>Pronto</b>
                     <small
                       >Envio do PDF, leitura do texto, explicação pela IA, pontos a conferir com a norma, banco de dados
-                      (Supabase) e nota de confiabilidade.</small
+                      (Supabase), nota de confiabilidade e o site publicado na internet (Vercel).</small
                     >
                   </div>
                 </div>
-                <div class="sr">
-                  <i class="nm" style="background: #b496ff">→</i>
+                <div class="passo">
+                  <i class="numero" style="background: #b496ff">→</i>
                   <div>
                     <b>Agora</b>
                     <small
@@ -719,15 +722,15 @@
                     >
                   </div>
                 </div>
-                <div class="sr">
-                  <i class="nm" style="background: #6db4ff">↗</i>
+                <div class="passo">
+                  <i class="numero" style="background: #6db4ff">↗</i>
                   <div>
                     <b>Próximo</b>
-                    <small>Publicar o site na internet (Vercel) e criar a página de políticas e termos.</small>
+                    <small>Criar a página de políticas e termos e aceitar PDFs maiores que 4 MB na versão publicada.</small>
                   </div>
                 </div>
-                <div class="sr">
-                  <i class="nm" style="background: #8d9bff">…</i>
+                <div class="passo">
+                  <i class="numero" style="background: #8d9bff">…</i>
                   <div>
                     <b>Depois</b>
                     <small
@@ -742,48 +745,44 @@
         </div>
       </section>
 
-      <!-- 10 · Chamada final + chamada final -->
-      <section class="bn c" style="--k: #3ff0a6">
-        <div class="gr">
+      <!-- 10 · Chamada final: botão para enviar o PDF -->
+      <section class="faixa faixa-final" style="--cor: #3ff0a6">
+        <div class="grade">
           <div>
-            <h2 class="rv" style="margin: 0 auto">
-              Antes de assinar, <span class="b">entenda o que está escrito.</span>
+            <h2 class="revelar" style="margin: 0 auto">
+              Antes de assinar, <span class="destaque">entenda o que está escrito.</span>
             </h2>
-            <a class="cta-verde rv" href="/enviar_pdf">Enviar meu PDF</a>
+            <a class="botao-verde revelar" href="/enviar_pdf">Enviar meu PDF</a>
           </div>
         </div>
       </section>
       <!-- rodapé -->
-      <footer class="ftx">
-        <div class="fwrap">
-          <div class="fcol" role="navigation" aria-label="Rodapé">
+      <footer class="rodape">
+        <div class="rodape-colunas">
+          <div class="rodape-coluna" role="navigation" aria-label="Rodapé">
             <h5>Navegação</h5>
-            <a href="/" data-top="">Início</a>
+            <a href="/" data-topo="">Início</a>
             <a href="/enviar_pdf">Envie seu PDF</a>
             <a href="/faq">FAQ</a>
             <a href="/sobre">Sobre nós</a>
             <a href="/contato">Contato</a>
             <a href="#">Políticas e termos</a>
           </div>
-          <div class="fcol">
+          <div class="rodape-coluna">
             <h5>Projeto</h5>
             <span>Projeto integrador</span>
             <span>Fatec Taquaritinga</span>
             <span>Protótipo em desenvolvimento</span>
           </div>
         </div>
-        <div class="fbot">
+        <div class="rodape-base">
           <span>© 2026 Detector de Cláusulas Abusivas em Contrato</span>
           <span>Protótipo acadêmico · não é aconselhamento jurídico</span>
         </div>
       </footer>
     </main>
-    <!-- scripts (todos em static/js; o Three.js fica em static/vendor/three, apontado pelo importmap no <head>) -->
-    <script type="module" src="/static/js/efeitos.js"></script>
-    <script type="module" src="/static/js/secoes.js"></script>
-    <script type="module" src="/static/js/iceberg.js"></script>
-    <script type="module" src="/static/js/hero.js"></script>
-    <script type="module" src="/static/js/montanha.js"></script>
-    <script type="module" src="/static/js/carro-comparacao.js"></script>
+    <!-- script da página (static/js/inicio/principal.js liga as outras partes; o Three.js fica em static/vendor/three,
+         apontado pelo importmap no <head>) -->
+    <script type="module" src="/static/js/inicio/principal.js"></script>
   </body>
 </html>

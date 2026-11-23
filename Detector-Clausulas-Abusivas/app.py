@@ -1,14 +1,23 @@
 # O servidor do site: mostra as páginas e recebe os PDFs enviados.
 # Para abrir no computador:  python app.py   e acesse http://localhost:5000
+# Os arquivos do site (CSS, JavaScript, modelos 3D) ficam em public/static: no computador o Flask os entrega;
+# na Vercel, a pasta public/ é entregue direto pela CDN (mais rápido, com compressão e cache).
 
-import os                                                      # lê o e-mail de contato do arquivo .env
+import os    # lê as variáveis do arquivo .env. Ex.: os.getenv("CONTATO_EMAIL")
 
-from dotenv import load_dotenv                                 # carrega o arquivo .env para dentro do programa
-from flask import Flask, jsonify, render_template, request    # Flask: cria o site e as rotas (endereços)
+from dotenv import load_dotenv    # carrega o arquivo .env para dentro do programa. Ex.: load_dotenv()
+from flask import Flask, jsonify, render_template, request    # cria o site e as rotas. Ex.: app.add_url_rule("/", ...)
 
 from main_detector import ErroDeEnvio, detectar
 
 load_dotenv()
+
+
+def limite_de_envio_em_mb():
+    """Maior PDF aceito: 50 MB no computador; 4 MB na Vercel, que recusa pedidos maiores que 4,5 MB."""
+    na_vercel = bool(os.getenv("VERCEL") or os.getenv("VERCEL_ENV"))
+    limite = 4 if na_vercel else 50
+    return limite
 
 
 def perguntas_do_faq():
@@ -26,8 +35,8 @@ def perguntas_do_faq():
         ),
         (
             "Que tipo de PDF posso enviar?",
-            "PDFs com texto selecionável, de até 50 MB. PDFs digitalizados (fotos de papel) ainda não são lidos, "
-            "porque o sistema não faz OCR.",
+            f"PDFs com texto selecionável, de até {limite_de_envio_em_mb()} MB. PDFs digitalizados (fotos de papel) "
+            "ainda não são lidos, porque o sistema não faz OCR.",
         ),
         (
             "O que significam Atenção, Verificar e Tudo certo?",
@@ -42,8 +51,9 @@ def perguntas_do_faq():
         ),
         (
             "O que acontece com o meu arquivo?",
-            "O PDF e o texto extraído são guardados em um armazenamento privado, usado para a análise e para a "
-            "comparação entre contratos. Evite enviar documentos com dados pessoais que você não queira guardar.",
+            "Antes da análise, CPF, CNPJ, e-mail e telefone são escondidos no texto. O PDF e o texto extraído são "
+            "guardados em um armazenamento privado, usado para a análise e para a comparação entre contratos. "
+            "Evite enviar documentos com dados pessoais que você não queira guardar.",
         ),
         (
             "A IA pode errar?",
@@ -62,7 +72,7 @@ def pagina_inicio():
 
 def pagina_enviar_pdf():
     """Página de envio do PDF."""
-    pagina = render_template("enviar_pdf.html")
+    pagina = render_template("enviar_pdf.html", limite_mb=limite_de_envio_em_mb())
     return pagina
 
 
@@ -103,7 +113,7 @@ def receber_pdf():
 
 def arquivo_grande_demais(erro):
     """Resposta quando o PDF passa do limite de tamanho (o Flask recusa antes de chegar ao detector)."""
-    resposta = {"erro": "O PDF passa do limite de 50 MB."}
+    resposta = {"erro": f"O PDF passa do limite de {limite_de_envio_em_mb()} MB."}
     return jsonify(resposta), 413
 
 
@@ -115,8 +125,9 @@ def erro_inesperado(erro):
 
 def criar_app():
     """Monta o site: limite de tamanho, endereços das páginas e a rota que recebe o PDF."""
-    app = Flask(__name__)
-    app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024    # 50 MB, o mesmo limite do armazenamento no Supabase
+    app = Flask(__name__, static_folder="public/static", static_url_path="/static")
+    # limite do PDF + 1 MB de folga para o resto do formulário (50 MB é também o limite do armazenamento no Supabase)
+    app.config["MAX_CONTENT_LENGTH"] = (limite_de_envio_em_mb() + 1) * 1024 * 1024
 
     app.add_url_rule("/", "index", pagina_inicio)
     app.add_url_rule("/enviar_pdf", "enviar_pdf", pagina_enviar_pdf)
@@ -130,7 +141,8 @@ def criar_app():
     return app
 
 
-app = criar_app()    # o Flask (e a Vercel, quando o site for publicado) procura esta variável "app"
+# Única variável fora de uma função: o Flask e a Vercel procuram uma variável chamada "app" neste arquivo.
+app = criar_app()
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

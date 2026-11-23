@@ -1,0 +1,152 @@
+/* ==========================================================================
+   Páginas informativas: FAQ, Sobre nós e Contato (templates/base_info.html)
+   Reaproveita as faixas, o menu, os cartões e o rodapé do comum.css e o fundo do enviar-pdf.css.
+   Classes novas começam com "info-".
+   ========================================================================== */
+.info-faixa {
+  min-height: 0;
+}
+.pagina-info .info-faixa:first-child > .grade {
+  padding-top: clamp(40px, 8vh, 100px);
+}
+.pagina-info .info-faixa:last-child > .grade {
+  padding-bottom: clamp(110px, 18vh, 220px);
+}
+.pagina-info .faixa h2 {
+  max-width: 12em;
+}
+.info-botao {
+  display: inline-block;
+  margin-top: 1.6em;
+  padding: 0.85em 1.6em;
+  border-radius: 999px;
+  background: #3ff0a6;
+  color: #04110c;
+  font-weight: 650;
+  text-decoration: none;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+.info-botao:hover,
+.info-botao:focus-visible {
+  outline: none;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -10px rgba(63, 240, 166, 0.7);
+}
+/* FAQ: perguntas que abrem e fecham */
+.info-faq details {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.info-faq details:first-child {
+  border-top: 0;
+}
+.info-faq summary {
+  position: relative;
+  padding: 1em 2em 1em 0;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  list-style: none;
+}
+.info-faq summary::-webkit-details-marker {
+  display: none;
+}
+.info-faq summary::after {
+  content: "+";
+  position: absolute;
+  right: 0.2em;
+  top: 0.8em;
+  font-size: 1.4em;
+  font-weight: 400;
+  color: var(--cor);
+  transition: transform 0.2s;
+}
+.info-faq details[open] summary::after {
+  transform: rotate(45deg);
+}
+.info-faq summary:focus-visible {
+  outline: 2px solid var(--cor);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.info-faq p {
+  padding: 0 0 1.1em;
+  line-height: 1.6;
+  color: #c3cddd;
+}
+/* Sobre nós: listas dentro do cartão */
+.info-lista,
+.info-passos {
+  display: grid;
+  gap: 1em;
+  padding-left: 0;
+  list-style: none;
+  color: #c3cddd;
+  line-height: 1.55;
+}
+.info-lista li,
+.info-passos li {
+  padding-left: 1em;
+  border-left: 2px solid color-mix(in srgb, var(--cor) 70%, transparent);
+}
+.info-passos {
+  counter-reset: passo;
+}
+.info-passos li {
+  counter-increment: passo;
+}
+.info-passos li::before {
+  content: counter(passo) ". ";
+  font-weight: 700;
+  color: var(--cor);
+}
+.info-lista b,
+.info-passos b {
+  color: #fff;
+}
+/* Contato: formulário */
+.info-form {
+  display: grid;
+  gap: 1em;
+}
+.info-form label {
+  display: grid;
+  gap: 0.4em;
+  font-size: 0.9em;
+  color: #c3cddd;
+}
+.info-form input,
+.info-form textarea {
+  width: 100%;
+  padding: 0.75em 0.9em;
+  border: 1px solid rgba(156, 194, 255, 0.35);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font: inherit;
+}
+.info-form input:focus-visible,
+.info-form textarea:focus-visible {
+  outline: 2px solid var(--cor);
+  outline-offset: 1px;
+}
+.info-form textarea {
+  resize: vertical;
+}
+.info-form small,
+.info-vazio {
+  color: #8d99ae;
+  line-height: 1.5;
+}
+.info-vazio code {
+  padding: 0.1em 0.4em;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+@media (max-width: 900px) {
+  .pagina-info .info-faixa:first-child > .grade {
+    padding-top: 24px;
+  }
+}

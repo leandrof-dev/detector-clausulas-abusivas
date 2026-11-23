@@ -1,11 +1,15 @@
 # Compara as cláusulas do contrato com as de contratos já guardados no banco e calcula a nota de confiabilidade.
 # A nota diz o quanto o contrato "está na curva": quão parecida cada cláusula é com as já conhecidas (100% = igual).
 
-import logging    # registra no terminal o detalhe técnico dos erros
+import logging    # registra no terminal o detalhe técnico dos erros. Ex.: logging.getLogger("x").warning("falhou")
 
 from banco import BancoErro, buscar_clausulas_de_outros_contratos, contar_contratos_da_base
 
-registro = logging.getLogger("detector.comparacao")
+
+def registro_de_erros():
+    """O registro (log) desta parte: o detalhe técnico dos erros aparece só no terminal, nunca para o usuário."""
+    registro = logging.getLogger("detector.comparacao")
+    return registro
 
 
 def minimo_de_contratos():
@@ -101,7 +105,7 @@ def comparar_com_a_base(clausulas, hash_do_pdf):
             else:
                 resultado["mensagem"] = "Poucos assuntos em comum com os contratos da base para calcular a nota."
     except BancoErro as erro:
-        registro.warning("Comparação com a base não feita: %s", erro)
+        registro_de_erros().warning("Comparação com a base não feita: %s", erro)
         resultado = resultado_indisponivel("Não consegui consultar a base de comparação agora.")
 
     return resultado
