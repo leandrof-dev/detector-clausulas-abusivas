@@ -1,6 +1,6 @@
 # Lê o texto de um PDF direto da memória (sem janela e sem salvar arquivo no computador).
 
-import pymupdf    # PyMuPDF: abre o PDF e extrai o texto de cada página (no requirements.txt é o "pymupdf")
+import pymupdf    # abre o PDF e extrai o texto (requirements.txt: "pymupdf"). Ex.: pymupdf.open(stream=bytes)
 
 
 def ler_pdf(conteudo_pdf):

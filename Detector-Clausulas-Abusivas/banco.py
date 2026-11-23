@@ -1,14 +1,14 @@
 # Guarda os envios no Supabase: o PDF no armazenamento privado e os dados nas tabelas.
 # Teste de conexão (só lê, não grava nada):  python banco.py
 
-import hashlib                       # calcula a "impressão digital" (hash) do PDF
-import os                            # lê as variáveis do arquivo .env
-import uuid                          # cria um código único para cada contrato
-from contextlib import suppress      # ignora um erro de propósito (em limpezas que podem falhar sem problema)
-from functools import lru_cache      # guarda a conexão pronta, para não criar uma nova a cada uso
+import hashlib                       # "impressão digital" (hash) do PDF. Ex.: hashlib.sha256(b"abc").hexdigest()
+import os                            # lê as variáveis do arquivo .env. Ex.: os.getenv("SUPABASE_URL")
+import uuid                          # cria um código único. Ex.: str(uuid.uuid4()) → "9b2c…-…"
+from contextlib import suppress      # ignora um erro de propósito. Ex.: with suppress(Exception): apagar_arquivo()
+from functools import lru_cache      # guarda o resultado de uma função. Ex.: @lru_cache em cima da função de conexão
 
-from dotenv import load_dotenv       # carrega o arquivo .env para dentro do programa
-from supabase import create_client   # biblioteca oficial do Supabase (banco + armazenamento)
+from dotenv import load_dotenv       # carrega o arquivo .env para dentro do programa. Ex.: load_dotenv()
+from supabase import create_client   # biblioteca do Supabase (banco + armazenamento). Ex.: create_client(url, chave)
 
 load_dotenv()
 
@@ -169,11 +169,16 @@ def buscar_clausulas_parecidas(vetor, limite=5, tipo=None):
 
 
 def contar_contratos_da_base(hash_excluido):
-    """Quantos PDFs DIFERENTES há na base, sem contar o PDF de hash_excluido (os reenvios do mesmo arquivo contam uma vez)."""
+    """Quantos PDFs DIFERENTES há na base, sem contar o PDF de hash_excluido.
+
+    Os reenvios do mesmo arquivo contam uma vez só (eles têm o mesmo hash).
+    """
     cliente = conectar_supabase()
 
     try:
-        resposta = cliente.table("contratos").select("hash_sha256").neq("hash_sha256", hash_excluido).limit(1000).execute()
+        resposta = (
+            cliente.table("contratos").select("hash_sha256").neq("hash_sha256", hash_excluido).limit(1000).execute()
+        )
     except Exception as erro:
         raise BancoErro(f"Não consegui contar os contratos da base: {erro}") from erro
 
