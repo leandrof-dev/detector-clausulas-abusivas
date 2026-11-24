@@ -75,35 +75,81 @@
   line-height: 1.6;
   color: #c3cddd;
 }
-/* Sobre nós: listas dentro do cartão */
+/* Sobre nós: itens dos cartões no mesmo formato do FAQ (título numa linha, texto embaixo, linha entre os itens) */
 .info-lista,
-.info-passos {
-  display: grid;
-  gap: 1em;
-  padding-left: 0;
+.info-passos,
+.info-equipe {
+  margin: 0;
+  padding: 0;
   list-style: none;
-  color: #c3cddd;
-  line-height: 1.55;
 }
 .info-lista li,
-.info-passos li {
-  padding-left: 1em;
-  border-left: 2px solid color-mix(in srgb, var(--cor) 70%, transparent);
+.info-passos li,
+.info-pessoa {
+  padding: 1em 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  line-height: 1.6;
+  color: #c3cddd;
 }
+.info-lista li:first-child,
+.info-passos li:first-child,
+.info-pessoa:first-child {
+  border-top: 0;
+}
+.info-lista b,
+.info-passos b,
+.info-pessoa b {
+  display: block;
+  margin-bottom: 0.25em;
+  font-weight: 600;
+  color: #fff;
+}
+/* passos numerados: o número aparece na cor da faixa, antes do título */
 .info-passos {
   counter-reset: passo;
 }
 .info-passos li {
   counter-increment: passo;
 }
-.info-passos li::before {
+.info-passos b::before {
   content: counter(passo) ". ";
-  font-weight: 700;
   color: var(--cor);
 }
-.info-lista b,
-.info-passos b {
+/* Sobre nós: a equipe (iniciais num círculo, nome, curso e e-mail) */
+.info-pessoa {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}
+.info-iniciais {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 3.1em;
+  height: 3.1em;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--cor) 55%, transparent);
+  background: color-mix(in srgb, var(--cor) 16%, transparent);
   color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.info-pessoa small {
+  display: block;
+  color: #8d99ae;
+  line-height: 1.45;
+}
+.info-pessoa a {
+  display: inline-block;
+  margin-top: 0.3em;
+  color: var(--cor);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.info-pessoa a:hover,
+.info-pessoa a:focus-visible {
+  outline: none;
+  text-decoration: underline;
 }
 /* Contato: formulário */
 .info-form {

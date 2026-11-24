@@ -1,18 +1,109 @@
 {% extends "base_info.html" %}
 {% block titulo %}Sobre nós{% endblock %}
 {% block conteudo %}
+<!-- 1 · Quem somos -->
 <section class="faixa info-faixa" aria-labelledby="sobre-titulo" style="--cor: #b496ff; --cor-tela: #b496ff">
   <i class="fundo-faixa"></i>
   <div class="grade">
     <div>
       <span class="etiqueta">Sobre nós</span>
-      <h2 id="sobre-titulo">Entender o contrato <span class="destaque">antes de assinar.</span></h2>
+      <h2 id="sobre-titulo">Quem está por trás <span class="destaque">do detector.</span></h2>
       <p class="subtitulo">
-        O Detector de Cláusulas Abusivas é um projeto integrador da Fatec Taquaritinga. A ideia é ajudar quem vai
-        financiar um veículo a ler o contrato em linguagem simples.
+        Somos Leandro Felipe Reis e Daniel Cabau, estudantes de Análise e Desenvolvimento de Sistemas da Fatec
+        Taquaritinga. O Detector de Cláusulas Abusivas nasceu como o nosso Projeto Integrador.
       </p>
       <div class="traco"></div>
       <p class="observacao">Protótipo acadêmico em desenvolvimento.</p>
+    </div>
+    <div class="cartao flutua env-card">
+      <div class="cartao-titulo">
+        <span class="icone" style="color: var(--cor)">
+          <svg viewBox="0 0 24 24">
+            <circle cx="9" cy="8" r="3.2" />
+            <path d="M3 19.5c.6-3.4 3-5.3 6-5.3s5.4 1.9 6 5.3" />
+            <circle cx="17" cy="9" r="2.6" />
+            <path d="M15.6 14.3c2.6.2 4.5 1.9 5 5.2" />
+          </svg>
+        </span>
+        <h3>A equipe</h3>
+      </div>
+      <ul class="info-equipe">
+        <li class="info-pessoa">
+          <span class="info-iniciais" aria-hidden="true">LR</span>
+          <div>
+            <b>Leandro Felipe Reis</b>
+            <small>Análise e Desenvolvimento de Sistemas · Fatec Taquaritinga</small>
+            <a href="mailto:leandroreis3@aluno.cps.sp.gov.br">leandroreis3<wbr />@aluno.cps.sp.gov.br</a>
+          </div>
+        </li>
+        <li class="info-pessoa">
+          <span class="info-iniciais" aria-hidden="true">DC</span>
+          <div>
+            <b>Daniel Cabau</b>
+            <small>Análise e Desenvolvimento de Sistemas · Fatec Taquaritinga</small>
+            <a href="mailto:danielcabeu@aluno.cps.sp.gov.br">danielcabeu<wbr />@aluno.cps.sp.gov.br</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · Por que criamos (o problema) -->
+<section class="faixa info-faixa" aria-labelledby="sobre-problema" style="--cor: #ff6b7d; --cor-tela: #ff6b7d">
+  <i class="fundo-faixa"></i>
+  <div class="grade">
+    <div>
+      <span class="etiqueta">Por que criamos</span>
+      <h2 id="sobre-problema">Um contrato longo, <span class="destaque">assinado em minutos.</span></h2>
+      <p class="subtitulo">
+        Financiar um carro costuma ser uma das maiores dívidas de uma família. Mesmo assim, a decisão quase sempre se
+        apoia num número só: o valor da parcela. O custo real fica nas tarifas, nos seguros e nos encargos.
+      </p>
+      <div class="traco"></div>
+    </div>
+    <div class="cartao flutua env-card">
+      <div class="cartao-titulo">
+        <span class="icone" style="color: var(--cor)">
+          <svg viewBox="0 0 24 24"><path d="M12 3.5l9 16H3z" /><path d="M12 10v4.5M12 17.4h.01" /></svg>
+        </span>
+        <h3>O problema</h3>
+      </div>
+      <ul class="info-lista">
+        <li>
+          <b>O contrato chega pronto.</b>
+          É um contrato de adesão: não dá para negociar as cláusulas, só aceitar ou recusar.
+        </li>
+        <li>
+          <b>A linguagem é técnica.</b>
+          Juros capitalizados, CET, tarifas e encargos de atraso aparecem em termos que pouca gente domina.
+        </li>
+        <li>
+          <b>Não dá tempo de ler.</b>
+          O documento chega quando a decisão já foi tomada e costuma ser assinado na hora.
+        </li>
+        <li>
+          <b>A lei protege, mas depende de você.</b>
+          O Código de Defesa do Consumidor garante seus direitos, mas é preciso perceber o que está fora do lugar para
+          usá-los.
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · Nosso objetivo -->
+<section class="faixa info-faixa" aria-labelledby="sobre-objetivo" style="--cor: #7fd4ff; --cor-tela: #7fd4ff">
+  <i class="fundo-faixa"></i>
+  <div class="grade">
+    <div>
+      <span class="etiqueta">Nosso objetivo</span>
+      <h2 id="sobre-objetivo">Entender o contrato <span class="destaque">antes de assinar.</span></h2>
+      <p class="subtitulo">
+        Queremos que qualquer pessoa consiga entender um contrato de financiamento de veículo, saiba o que vale conferir
+        e chegue mais preparada para conversar com o banco, enquanto ainda dá para desistir.
+      </p>
+      <div class="traco"></div>
     </div>
     <div class="cartao flutua env-card">
       <div class="cartao-titulo">
@@ -22,21 +113,35 @@
         <h3>O que fazemos</h3>
       </div>
       <ul class="info-lista">
-        <li><b>Lemos o contrato para você.</b> Uma IA explica o documento com frases curtas e aponta o que vale conferir.</li>
-        <li><b>Citamos a norma.</b> Cada ponto de atenção vem com o trecho do contrato e a regra que o sustenta (CDC, resoluções do CMN, súmulas do STJ).</li>
-        <li><b>Comparamos com outros contratos.</b> Uma nota mostra o quanto as cláusulas fogem do que o sistema já viu.</li>
-        <li><b>Não substituímos um advogado.</b> A leitura é assistida e serve para você chegar mais preparado a uma conversa.</li>
+        <li>
+          <b>Lemos o contrato para você.</b>
+          Uma IA explica o documento com frases curtas e aponta o que vale conferir.
+        </li>
+        <li>
+          <b>Citamos a norma.</b>
+          Cada ponto de atenção vem com o trecho do contrato e a regra que o sustenta (CDC, resoluções do CMN, súmulas
+          do STJ).
+        </li>
+        <li>
+          <b>Comparamos com outros contratos.</b>
+          Uma nota mostra o quanto as cláusulas fogem do que o sistema já viu.
+        </li>
+        <li>
+          <b>Não substituímos um advogado.</b>
+          A leitura é assistida e serve para você chegar mais preparado a uma conversa.
+        </li>
       </ul>
     </div>
   </div>
 </section>
 
+<!-- 4 · Como funciona (os mesmos 5 passos da página inicial) -->
 <section class="faixa info-faixa" aria-labelledby="sobre-como" style="--cor: #3ff0a6; --cor-tela: #3ff0a6">
   <i class="fundo-faixa"></i>
   <div class="grade">
     <div>
       <span class="etiqueta">Como funciona</span>
-      <h2 id="sobre-como">Do PDF ao <span class="destaque">resultado em 4 passos.</span></h2>
+      <h2 id="sobre-como">Do PDF ao <span class="destaque">resultado em 5 passos.</span></h2>
       <div class="traco"></div>
     </div>
     <div class="cartao flutua env-card">
@@ -47,10 +152,26 @@
         <h3>O caminho do contrato</h3>
       </div>
       <ol class="info-passos">
-        <li><b>Envio.</b> Você manda o PDF, com texto selecionável.</li>
-        <li><b>Leitura.</b> O sistema extrai o texto e separa o contrato em cláusulas.</li>
-        <li><b>Análise.</b> A IA resume o contrato, marca o assunto de cada cláusula e destaca os pontos de atenção.</li>
-        <li><b>Comparação.</b> As cláusulas são comparadas com as de contratos já analisados e geram a nota de confiabilidade.</li>
+        <li>
+          <b>Envie o contrato</b>
+          Um PDF do contrato de financiamento de veículo, com texto selecionável.
+        </li>
+        <li>
+          <b>Leitura do texto</b>
+          O sistema lê o documento e separa o texto em cláusulas.
+        </li>
+        <li>
+          <b>Explicação clara</b>
+          Uma IA explica o contrato em linguagem comum, de forma literal.
+        </li>
+        <li>
+          <b>Pontos a conferir</b>
+          Cada ponto vem com o trecho do contrato e a norma que o sustenta.
+        </li>
+        <li>
+          <b>Comparação</b>
+          As cláusulas são comparadas com as de contratos já analisados e viram a nota de confiabilidade.
+        </li>
       </ol>
     </div>
   </div>
