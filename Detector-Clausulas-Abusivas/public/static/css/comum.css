@@ -1,0 +1,499 @@
+/* ==========================================================================
+   Estilos comuns a todas as páginas — Detector de Cláusulas
+   --------------------------------------------------------------------------
+   Usado pela página inicial (junto com o inicio.css), pela página de envio (enviar-pdf.css)
+   e pelas páginas informativas (paginas.css).
+
+   Índice
+      1. Base
+      2. Menu (navegação)
+      3. Ícones
+      4. Faixas (seções) e grade de duas colunas
+      5. Títulos e textos das faixas
+      6. Cartões de vidro com efeito 3D
+      7. Rodapé
+      8. Telas menores e preferências do sistema
+      9. Animações (@keyframes)
+
+   Variáveis (custom properties) usadas aqui
+     --cor              cor de destaque da faixa (escrita no HTML de cada <section>)
+     --cor-tela         cor da faixa que está no meio da tela (inicio/efeitos.js)
+     --cor-etapa        cor da etapa do topo da página inicial (inicio/topo.js)
+     --posicao          posição da faixa na tela, de -1 a 1, para o parallax (inicio/efeitos.js)
+     --giro-lateral, --giro-vertical, --zoom, --mouse-em-cima,
+     --mouse-x, --mouse-y, --sombra-x, --sombra-y, --angulo-reflexo
+                        inclinação, brilho e sombra dos cartões 3D (comum/cartoes-3d.js)
+   ========================================================================== */
+/* ---------- 1. Base ---------- */
+:root {
+  --cor-etapa: #ff5566;
+  --azul: #2f9bff;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html {
+  background: #04070d;
+}
+html,
+body {
+  overflow-x: clip;
+}
+body {
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv11", "ss03", "calt";
+  text-rendering: optimizeLegibility;
+  font-optical-sizing: auto;
+}
+/* ---------- 2. Menu (navegação) ---------- */
+nav {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 84px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(22px, 4vw, 64px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  z-index: 6;
+  font-size: clamp(13px, 1.15vw, 19px);
+}
+nav a {
+  position: relative;
+  color: #c3cddd;
+  text-decoration: none;
+  padding: 30px 0;
+  transition: color 0.2s;
+}
+/* sublinhado que cresce ao passar o mouse */
+nav a::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  width: 0;
+  height: 1px;
+  background: #fff;
+  opacity: 0.6;
+  transition:
+    width 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
+    left 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+nav a:hover {
+  color: #fff;
+}
+nav a:hover::before {
+  width: 100%;
+  left: 0;
+}
+nav a.ativo {
+  color: #fff;
+  font-weight: 500;
+}
+/* traço azul embaixo da página atual */
+nav a.ativo::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: 70px;
+  height: 3px;
+  border-radius: 3px;
+  transform: translateX(-50%);
+  background: var(--azul);
+  box-shadow: 0 0 14px var(--azul);
+}
+/* ---------- 3. Ícones ---------- */
+/* ícone dos títulos dos cartões (e do painel do topo da página inicial) */
+.icone {
+  position: relative;
+  width: 2em;
+  height: 2em;
+  flex: none;
+  color: var(--cor-etapa);
+}
+.icone svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* ---------- 4. Faixas (seções) e grade de duas colunas ---------- */
+.faixa {
+  --cor: #ff5566;
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+/* arcos de luz decorativos de cada faixa (andam um pouco com o parallax) */
+.faixa::before {
+  content: "";
+  position: absolute;
+  right: -22%;
+  top: -46%;
+  width: 84vw;
+  height: 120%;
+  border-radius: 50%;
+  border: 2px solid rgba(170, 200, 255, 0.24);
+  box-shadow: 0 0 80px rgba(100, 150, 255, 0.12);
+  pointer-events: none;
+  translate: calc(var(--posicao, 0) * -40px) calc(var(--posicao, 0) * 30px);
+}
+.faixa::after {
+  content: "";
+  position: absolute;
+  left: -30%;
+  bottom: -64%;
+  width: 150%;
+  height: 92%;
+  border-radius: 50%;
+  border-top: 2px solid rgba(215, 230, 255, 0.34);
+  box-shadow: 0 -10px 60px rgba(120, 170, 255, 0.1);
+  pointer-events: none;
+  translate: calc(var(--posicao, 0) * 50px) calc(var(--posicao, 0) * -22px);
+}
+/* fundo de cada faixa: se dissolve nas bordas (a página vira um fluxo contínuo, sem cortes) */
+.fundo-faixa {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(5, 8, 16, 0.55) 0,
+      rgba(5, 8, 16, 0.4) 25%,
+      rgba(5, 8, 16, 0.2) 50%,
+      rgba(5, 8, 16, 0) 78%
+    ),
+    radial-gradient(
+      54% 66% at 74% 50%,
+      color-mix(in srgb, var(--cor-tela, #b496ff) 20%, rgba(195, 210, 236, 0.28)),
+      rgba(140, 160, 196, 0.08) 55%,
+      transparent 80%
+    );
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 28%, #000 72%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 28%, #000 72%, transparent 100%);
+}
+/* grade: texto à esquerda, cartão à direita */
+.grade {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: 4vw;
+  align-items: center;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 5.2vw;
+}
+.faixa > .grade {
+  padding-top: clamp(64px, 11vh, 130px);
+  padding-bottom: clamp(64px, 11vh, 130px);
+}
+/* ---------- 5. Títulos e textos das faixas ---------- */
+.etiqueta {
+  display: inline-block;
+  position: relative;
+  margin-bottom: 1.1em;
+  padding-left: 2.6em;
+  font-size: clamp(11px, 0.85vw, 14px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--cor-tela, #9cc2ff) 45%, #dbe9ff);
+}
+/* tracinho antes da etiqueta: cresce quando a etiqueta aparece */
+.etiqueta::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 1.9em;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cor-tela, #9cc2ff));
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.9s 0.15s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.faixa h2 {
+  max-width: 11em;
+  font-size: clamp(30px, 4vw, 76px);
+  line-height: 1.05;
+  font-weight: 650;
+  letter-spacing: -0.032em;
+  text-wrap: balance;
+  background: linear-gradient(180deg, #fff 40%, #dfe7f3);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* parte colorida do título (.destaque): cor da faixa no meio da tela, com um brilho que corre */
+.faixa h2 .destaque {
+  background-image: linear-gradient(
+    100deg,
+    var(--cor-tela, #2d98ff) 0,
+    color-mix(in srgb, var(--cor-tela, #2d98ff) 50%, #fff) 50%,
+    var(--cor-tela, #2d98ff) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: brilhar 7s linear infinite;
+  filter: drop-shadow(0 0 18px rgba(60, 140, 255, 0.28));
+}
+.subtitulo {
+  margin-top: 1.1em;
+  max-width: 25em;
+  font-size: clamp(14px, 1.35vw, 23px);
+  font-weight: 500;
+  line-height: 1.4;
+  color: #e9eef8;
+  text-wrap: pretty;
+}
+.traco {
+  margin-top: 1.5em;
+  width: 7vw;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--cor);
+  box-shadow: 0 0 14px var(--cor);
+  transform-origin: left;
+}
+.observacao {
+  margin-top: 1.2em;
+  max-width: 30em;
+  color: #d3dbe9;
+  font-size: clamp(12px, 0.95vw, 15px);
+  line-height: 1.5;
+}
+/* parallax: texto e cartão andam em velocidades diferentes (só a página inicial muda o --posicao) */
+.faixa .grade > div:first-child {
+  translate: 0 calc(var(--posicao, 0) * -26px);
+}
+.faixa .grade > div:last-child {
+  translate: 0 calc(var(--posicao, 0) * 34px);
+}
+/* ---------- 6. Cartões de vidro com efeito 3D ---------- */
+/* a inclinação segue o mouse: --giro-lateral/--giro-vertical (ângulos), --zoom e --mouse-em-cima (0 a 1)
+   vêm do comum/cartoes-3d.js */
+.cartao {
+  position: relative;
+  padding: clamp(16px, 1.6vw, 28px);
+  border-radius: 22px;
+  transform: perspective(1100px) rotateY(calc(-8deg + var(--giro-lateral, 0deg)))
+    rotateX(calc(2deg + var(--giro-vertical, 0deg))) scale(var(--zoom, 1)) !important;
+  transform-style: preserve-3d;
+  transition: none;
+  will-change: transform;
+  background: linear-gradient(160deg, rgba(18, 26, 44, 0.92), rgba(8, 13, 25, 0.9));
+  border: 1px solid rgba(110, 165, 255, 0.5);
+  box-shadow:
+    var(--sombra-x, 0px) calc(var(--sombra-y, 0px) + 26px) 60px -24px
+      rgba(0, 0, 0, calc(0.32 + var(--mouse-em-cima, 0) * 0.3)),
+    0 0 calc(30px + var(--mouse-em-cima, 0) * 20px) rgba(60, 130, 255, calc(0.3 + var(--mouse-em-cima, 0) * 0.14)),
+    inset 0 0 34px rgba(60, 130, 255, 0.1),
+    inset 3px 0 0 -1px var(--cor);
+}
+.flutua {
+  animation: flutuar 7s ease-in-out infinite;
+}
+.cartao-titulo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 0.75em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e6ecf7;
+  font-size: clamp(13px, 1.1vw, 19px);
+}
+/* o conteúdo "salta" para frente quando o mouse está em cima */
+.cartao > *,
+#painel > * {
+  transform: translateZ(calc(var(--mouse-em-cima, 0) * 22px));
+}
+.cartao > .cartao-titulo,
+#painel > .painel-titulo {
+  transform: translateZ(calc(var(--mouse-em-cima, 0) * 38px));
+}
+/* reflexo que acompanha o cursor (--mouse-x/--mouse-y) */
+.cartao::after,
+#painel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  transform: translateZ(1px);
+  opacity: var(--mouse-em-cima, 0);
+  background:
+    radial-gradient(
+      480px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(205, 225, 255, 0.17),
+      transparent 44%
+    ),
+    linear-gradient(var(--angulo-reflexo, 115deg), transparent 35%, rgba(255, 255, 255, 0.05) 50%, transparent 65%);
+}
+/* borda que acende perto do cursor */
+.cartao::before,
+#painel::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  pointer-events: none;
+  transform: translateZ(2px);
+  opacity: var(--mouse-em-cima, 0);
+  background: radial-gradient(
+    240px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    color-mix(in srgb, var(--cor, var(--cor-etapa, #9cc2ff)) 80%, #fff),
+    transparent 70%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+/* selo com a norma (CDC, CMN…) */
+.selo {
+  display: inline-block;
+  padding: 0.25em 0.7em;
+  border-radius: 20px;
+  border: 1px solid rgba(110, 165, 255, 0.4);
+  color: #9cc2ff;
+  font-style: normal;
+  font-size: clamp(10px, 0.78vw, 13px);
+  text-align: right;
+}
+/* ---------- 7. Rodapé ---------- */
+.rodape {
+  position: relative;
+  z-index: 2;
+  padding: clamp(64px, 10vh, 110px) 5.2vw 24px;
+  background: #070b14; /* preto por completo, igual em todas as páginas */
+  color: #aab5c8;
+  font-size: 14px;
+}
+.rodape::before {
+  content: "";
+  position: absolute;
+  left: 5.2vw;
+  right: 5.2vw;
+  top: clamp(20px, 3vh, 36px);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(160, 190, 255, 0.35), transparent);
+}
+.rodape-colunas {
+  display: flex;
+  justify-content: flex-start;
+  gap: clamp(48px, 9vw, 160px);
+  max-width: 1440px;
+  margin: 0 auto;
+}
+.rodape-coluna h5 {
+  margin-bottom: 1em;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.rodape-coluna a,
+.rodape-coluna span {
+  display: block;
+  width: fit-content;
+  padding: 0.38em 0;
+  color: #aab5c8;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.rodape-coluna a:hover,
+.rodape-coluna a:focus-visible {
+  outline: none;
+  color: #fff;
+}
+.rodape-base {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.6em 2em;
+  max-width: 1440px;
+  margin: clamp(34px, 6vh, 60px) auto 0;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: #7d889c;
+  font-size: 12.5px;
+}
+/* ---------- 8. Telas menores e preferências do sistema ---------- */
+/* celular e tablet (até 900px): uma coluna e cartões sem efeito 3D */
+@media (max-width: 900px) {
+  nav {
+    gap: 14px;
+    height: 64px;
+  }
+  .grade {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .faixa > .grade {
+    padding-top: 64px;
+    padding-bottom: 64px;
+  }
+  .faixa h2 {
+    max-width: none;
+  }
+  .faixa .grade > div {
+    translate: none !important;
+  }
+  .cartao {
+    transform: none !important;
+  }
+  .cartao > * {
+    transform: none !important;
+  }
+}
+/* telas de toque: o cartão fica levemente inclinado e parado (tem de vir depois do bloco acima) */
+@media (hover: none) {
+  .cartao {
+    transform: perspective(1400px) rotateY(-8deg) rotateX(2deg) !important;
+  }
+}
+/* "reduzir movimento" ligado no sistema: tudo aparece direto, sem parallax nem brilhos correndo */
+@media (prefers-reduced-motion: reduce) {
+  .faixa h2 .destaque {
+    animation: none;
+  }
+  .faixa .grade > div,
+  .faixa::before,
+  .faixa::after {
+    translate: none !important;
+  }
+}
+/* ---------- 9. Animações (@keyframes) ---------- */
+/* cartões e painel sobem e descem devagar */
+@keyframes flutuar {
+  50% {
+    translate: 0 -8px;
+  }
+}
+/* brilho que corre pelo texto colorido */
+@keyframes brilhar {
+  to {
+    background-position: 200% 0;
+  }
+}

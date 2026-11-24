@@ -3,9 +3,9 @@
 #     python main_detector.py contrato.pdf              (lê, analisa com a IA e compara, mas não grava nada)
 #     python main_detector.py contrato.pdf --salvar     (também guarda no Supabase)
 
-import os                                     # pega só o nome do arquivo a partir do caminho digitado no terminal
-import sys                                    # lê o que foi digitado no terminal
-from concurrent.futures import ThreadPoolExecutor    # roda as 3 tarefas da IA ao mesmo tempo, para não somar as esperas
+import os     # pega só o nome do arquivo a partir do caminho. Ex.: os.path.basename("pasta/x.pdf") → "x.pdf"
+import sys    # lê o que foi digitado no terminal. Ex.: sys.argv[1:] → ["contrato.pdf", "--salvar"]
+from concurrent.futures import ThreadPoolExecutor   # várias tarefas ao mesmo tempo. Ex.: equipe.submit(funcao, dado)
 
 from banco import BancoErro, calcular_hash, guardar_analise, guardar_clausulas, guardar_contrato, marcar_erro
 from comparacao import comparar_com_a_base, resultado_indisponivel
@@ -96,7 +96,9 @@ def ler_com_ia(texto):
             vetores = tarefa_vetores.result()
         except IAErro:
             vetores = [None] * len(pedacos)
-            avisos.append("Não foi possível gerar os números de comparação (embeddings), então a nota não foi calculada.")
+            avisos.append(
+                "Não foi possível gerar os números de comparação (embeddings), então a nota não foi calculada."
+            )
 
     clausulas = [
         {"ordem": ordem, "tipo": tipo, "texto": pedaco, "embedding": vetor}
@@ -115,7 +117,9 @@ def guardar_no_banco(nome_arquivo, conteudo_pdf, leitura_pdf, resultado_ia, comp
     registro = {"contrato_id": None, "analise_id": None, "clausulas": 0, "aviso": None}
 
     try:
-        registro["contrato_id"] = guardar_contrato(nome_arquivo, conteudo_pdf, leitura_pdf["texto"], leitura_pdf["paginas"])
+        registro["contrato_id"] = guardar_contrato(
+            nome_arquivo, conteudo_pdf, leitura_pdf["texto"], leitura_pdf["paginas"]
+        )
         registro["analise_id"] = guardar_analise(
             registro["contrato_id"],
             {**resultado_ia["leitura"], "comparacao": comparacao},
@@ -180,10 +184,15 @@ def testar_pelo_terminal(argumentos):
             resultado = detectar(os.path.basename(caminhos[0]), conteudo, salvar)
             leitura = resultado["leitura"]
             confiabilidade = resultado["confiabilidade"]
-            nota = f"Confiabilidade: {confiabilidade['nota']}%" if confiabilidade["disponivel"] else f"Confiabilidade: {confiabilidade['mensagem']}"
+            nota = (
+                f"Confiabilidade: {confiabilidade['nota']}%"
+                if confiabilidade["disponivel"]
+                else f"Confiabilidade: {confiabilidade['mensagem']}"
+            )
 
             linhas = [
-                f"{resultado['paginas']} página(s), {resultado['caracteres']} caracteres lidos. Modelo: {resultado['modelo']}.",
+                f"{resultado['paginas']} página(s), {resultado['caracteres']} caracteres lidos. "
+                f"Modelo: {resultado['modelo']}.",
                 f"Documento: {leitura['tipo_documento']}",
                 f"Em uma frase: {leitura['manchete']}",
                 "Resumo:",
